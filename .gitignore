@@ -1,0 +1,43 @@
+# ================================
+# Backend (Spring Boot / Gradle)
+# ================================
+backend/.gradle/
+backend/build/
+backend/out/
+backend/.idea/
+backend/*.iws
+backend/*.iml
+backend/*.ipr
+backend/HELP.md
+
+# Spring Boot jar
+backend/*.jar
+backend/*.war
+
+# application secrets
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-prod.yml
+
+# ================================
+# Frontend (React / Vite / Node)
+# ================================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ================================
+# OS / Editor
+# ================================
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+*.log
+
+# ================================
+# Environment
+# ================================
+.env
+.env.local
+*.env
