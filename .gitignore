@@ -33,7 +33,20 @@ frontend/.env.production
 .DS_Store
 Thumbs.db
 .vscode/settings.json
+*.code-workspace
 *.log
+
+# ================================
+# Claude AI
+# ================================
+CLAUDE.md
+.claude/
+
+# ================================
+# Docker (contains credentials)
+# ================================
+docker-compose.yml
+docker-compose.*.yml
 
 # ================================
 # Environment
