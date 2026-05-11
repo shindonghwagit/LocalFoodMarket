@@ -1,4 +1,4 @@
-# 🌾 LocalFoodMarket
+# LocalFoodMarket
 
 > 지역 농가와 소비자를 직접 연결하는 직거래 플랫폼
 
@@ -63,7 +63,3 @@ npm run dev
 - [ERD](./docs/ERD.md)
 - [API 명세](./docs/API.md)
 - [아키텍처](./docs/ARCHITECTURE.md)
-
-## 개발자
-
-순천향대학교 AICS Lab · 20214038 신동화
