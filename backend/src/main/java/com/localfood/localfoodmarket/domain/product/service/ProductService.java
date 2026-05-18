@@ -12,11 +12,14 @@ import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
 import com.localfood.localfoodmarket.global.exception.BusinessException;
 import com.localfood.localfoodmarket.global.exception.ErrorCode;
+import com.localfood.localfoodmarket.global.sse.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final FarmRepository farmRepository;
     private final UserRepository userRepository;
+    private final SseEmitterManager sseEmitterManager;
 
     @Transactional
     public ProductResponseDto createProduct(Long userId, ProductRequestDto request) {
@@ -55,6 +59,14 @@ public class ProductService {
                 request.getHarvestDate(),
                 request.getDescription()
         );
+
+        int newStock = request.getStock();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                sseEmitterManager.sendStockUpdate(productId, newStock);
+            }
+        });
 
         return ProductResponseDto.from(product);
     }

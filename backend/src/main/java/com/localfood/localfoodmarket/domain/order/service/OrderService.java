@@ -21,14 +21,18 @@ import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
 import com.localfood.localfoodmarket.global.exception.BusinessException;
 import com.localfood.localfoodmarket.global.exception.ErrorCode;
+import com.localfood.localfoodmarket.global.sse.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final FarmRepository farmRepository;
     private final PointLogRepository pointLogRepository;
+    private final SseEmitterManager sseEmitterManager;
 
     @Transactional
     public OrderResponseDto createOrder(Long userId, OrderRequestDto request) {
@@ -101,7 +106,38 @@ public class OrderService {
                     .build()));
         }
 
-        return OrderResponseDto.of(order, savedItems, user.getPointBalance());
+        OrderResponseDto result = OrderResponseDto.of(order, savedItems, user.getPointBalance());
+
+        // 트랜잭션 커밋 이후 SSE 이벤트 전송 (커밋 전 전송 방지)
+        record SsePayload(Long farmId, Long orderId, String productName, Long productId, int quantity, int totalPrice, int stock) {}
+        List<SsePayload> ssePayloads = savedItems.stream()
+                .map(item -> new SsePayload(
+                        item.getProduct().getFarm().getId(),
+                        order.getId(),
+                        item.getProduct().getName(),
+                        item.getProduct().getId(),
+                        item.getQuantity(),
+                        item.getQuantity() * item.getPriceAtOrder(),
+                        item.getProduct().getStock()
+                ))
+                .toList();
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                ssePayloads.forEach(p -> {
+                    sseEmitterManager.sendToFarm(p.farmId(), "new-order", Map.of(
+                            "orderId", p.orderId(),
+                            "productName", p.productName(),
+                            "quantity", p.quantity(),
+                            "totalPrice", p.totalPrice()
+                    ));
+                    sseEmitterManager.sendStockUpdate(p.productId(), p.stock());
+                });
+            }
+        });
+
+        return result;
     }
 
     @Transactional(readOnly = true)
