@@ -1,6 +1,10 @@
-# LocalFoodMarket
+<div align="center">
+  <img src="./docs/logo.png" alt="Farmer's Market Logo" width="200"/>
 
-> 지역 농가와 소비자를 직접 연결하는 직거래 플랫폼
+  # Farmer's Market
+
+  > 지역 농가와 소비자를 직접 연결하는 직거래 플랫폼
+</div>
 
 ## 서비스 소개
 

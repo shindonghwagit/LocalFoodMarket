@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Colors ─────────────────────────────────────────────────────────── */
+  --color-primary:                  #154212;
+  --color-on-primary:               #ffffff;
+  --color-primary-container:        #2d5a27;
+  --color-on-primary-container:     #9dd090;
+  --color-primary-fixed:            #bcf0ae;
+  --color-primary-fixed-dim:        #a1d494;
+  --color-on-primary-fixed:         #002201;
+  --color-on-primary-fixed-variant: #23501e;
+  --color-inverse-primary:          #a1d494;
+
+  --color-secondary:                #855300;
+  --color-on-secondary:             #ffffff;
+  --color-secondary-container:      #fea619;
+  --color-on-secondary-container:   #684000;
+  --color-secondary-fixed:          #ffddb8;
+  --color-secondary-fixed-dim:      #ffb95f;
+  --color-on-secondary-fixed:       #2a1700;
+  --color-on-secondary-fixed-variant: #653e00;
+
+  --color-tertiary:                 #293f18;
+  --color-on-tertiary:              #ffffff;
+  --color-tertiary-container:       #3f572d;
+  --color-on-tertiary-container:    #b0cc97;
+  --color-tertiary-fixed:           #cfecb4;
+  --color-tertiary-fixed-dim:       #b3cf9a;
+  --color-on-tertiary-fixed:        #0c2000;
+  --color-on-tertiary-fixed-variant: #364d24;
+
+  --color-surface:                  #faf9f5;
+  --color-surface-dim:              #dbdad6;
+  --color-surface-bright:           #faf9f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low:    #f4f4f0;
+  --color-surface-container:        #efeeea;
+  --color-surface-container-high:   #e9e8e4;
+  --color-surface-container-highest: #e3e2df;
+  --color-surface-variant:          #e3e2df;
+  --color-surface-tint:             #3b6934;
+  --color-inverse-surface:          #2f312e;
+  --color-inverse-on-surface:       #f2f1ed;
+
+  --color-on-surface:               #1b1c1a;
+  --color-on-surface-variant:       #42493e;
+  --color-on-background:            #1b1c1a;
+  --color-background:               #faf9f5;
+
+  --color-outline:                  #72796e;
+  --color-outline-variant:          #c2c9bb;
+
+  --color-error:                    #ba1a1a;
+  --color-on-error:                 #ffffff;
+  --color-error-container:          #ffdad6;
+  --color-on-error-container:       #93000a;
+
+  /* ── Typography — Font Families ─────────────────────────────────────── */
+  --font-headline-xl:        "Plus Jakarta Sans", sans-serif;
+  --font-headline-lg:        "Plus Jakarta Sans", sans-serif;
+  --font-headline-lg-mobile: "Plus Jakarta Sans", sans-serif;
+  --font-headline-md:        "Plus Jakarta Sans", sans-serif;
+  --font-headline-sm:        "Plus Jakarta Sans", sans-serif;
+  --font-body-lg:            "Be Vietnam Pro", sans-serif;
+  --font-body-md:            "Be Vietnam Pro", sans-serif;
+  --font-label-md:           "Be Vietnam Pro", sans-serif;
+  --font-label-sm:           "Be Vietnam Pro", sans-serif;
+
+  /* ── Typography — Font Sizes ─────────────────────────────────────────── */
+  --text-headline-xl: 48px;
+  --text-headline-lg: 32px;
+  --text-headline-md: 24px;
+  --text-headline-sm: 20px;
+  --text-body-lg:     18px;
+  --text-body-md:     16px;
+  --text-label-md:    14px;
+  --text-label-sm:    12px;
+
+  /* ── Border Radius ───────────────────────────────────────────────────── */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg:      0.5rem;
+  --radius-xl:      0.75rem;
+  --radius-full:    9999px;
+
+  /* ── Spacing ─────────────────────────────────────────────────────────── */
+  --spacing-xs:           4px;
+  --spacing-sm:           12px;
+  --spacing-base:         8px;
+  --spacing-md:           24px;
+  --spacing-gutter:       24px;
+  --spacing-lg:           48px;
+  --spacing-xl:           80px;
+  --spacing-margin-mobile: 16px;
+  --spacing-max-width:    1280px;
+}
+
+/* ── Global Base ──────────────────────────────────────────────────────────── */
+body {
+  background-color: #faf9f5;
+  color: #1b1c1a;
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.hero-gradient {
+  background: linear-gradient(rgba(21, 66, 18, 0.4), rgba(21, 66, 18, 0.6));
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+}
