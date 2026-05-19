@@ -1,5 +1,8 @@
 package com.localfood.localfoodmarket.global.config;
 
+import com.localfood.localfoodmarket.global.oauth2.CustomOAuth2UserService;
+import com.localfood.localfoodmarket.global.oauth2.OAuth2AuthenticationFailureHandler;
+import com.localfood.localfoodmarket.global.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.localfood.localfoodmarket.global.security.JwtAuthenticationFilter;
 import com.localfood.localfoodmarket.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +29,21 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // OAuth2 로그인은 세션을 잠깐 사용하므로 IF_REQUIRED 유지, 나머지는 STATELESS 처럼 동작
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/farms/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
@@ -43,8 +51,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/sse/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/address/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/files/**").hasAnyRole("CONSUMER", "FARMER")
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint ->
+                                endpoint.baseUri("/auth/oauth2"))
+                        .redirectionEndpoint(endpoint ->
+                                endpoint.baseUri("/auth/oauth2/callback/*"))
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
                         UsernamePasswordAuthenticationFilter.class);

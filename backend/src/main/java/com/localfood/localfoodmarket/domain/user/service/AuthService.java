@@ -2,9 +2,12 @@ package com.localfood.localfoodmarket.domain.user.service;
 
 import com.localfood.localfoodmarket.domain.user.dto.AuthResponseDto;
 import com.localfood.localfoodmarket.domain.user.dto.LoginRequestDto;
+import com.localfood.localfoodmarket.domain.user.dto.OAuth2CompleteRequestDto;
 import com.localfood.localfoodmarket.domain.user.dto.RegisterRequestDto;
 import com.localfood.localfoodmarket.domain.user.entity.Role;
+import com.localfood.localfoodmarket.domain.user.entity.SocialAccount;
 import com.localfood.localfoodmarket.domain.user.entity.User;
+import com.localfood.localfoodmarket.domain.user.repository.SocialAccountRepository;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
 import com.localfood.localfoodmarket.global.exception.BusinessException;
 import com.localfood.localfoodmarket.global.exception.ErrorCode;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final SocialAccountRepository socialAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -56,6 +60,46 @@ public class AuthService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED,
                     "이메일 또는 비밀번호가 올바르지 않아요.");
         }
+
+        return issueTokens(user);
+    }
+
+    @Transactional
+    public AuthResponseDto completeOAuth2Register(OAuth2CompleteRequestDto request) {
+        String tempToken = request.getTempToken();
+
+        if (!jwtUtil.validate(tempToken) || !jwtUtil.isTempToken(tempToken)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "유효하지 않은 임시 토큰이에요. 소셜 로그인을 다시 시도해주세요.");
+        }
+
+        // ADMIN 역할 선택 차단
+        if (request.getRole() == Role.ADMIN) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "해당 역할은 선택할 수 없어요.");
+        }
+
+        String email = jwtUtil.extractSubject(tempToken);
+        String provider = jwtUtil.extractProvider(tempToken);
+        String providerId = jwtUtil.extractProviderId(tempToken);
+
+        if (socialAccountRepository.findByProviderAndProviderId(provider, providerId).isPresent()) {
+            throw new BusinessException(ErrorCode.SOCIAL_ACCOUNT_EXISTS);
+        }
+
+        // 동일 이메일로 가입된 계정이 있으면 소셜 계정을 연동, 없으면 신규 생성
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .email(email)
+                                .role(request.getRole())
+                                .build()
+                ));
+
+        SocialAccount socialAccount = SocialAccount.builder()
+                .user(user)
+                .provider(provider)
+                .providerId(providerId)
+                .build();
+        socialAccountRepository.save(socialAccount);
 
         return issueTokens(user);
     }

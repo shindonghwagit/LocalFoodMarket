@@ -43,15 +43,75 @@ localfoodmarket/
 - 카카오·구글 소셜 로그인
 - 관리자 농가 승인·사용자 관리
 
-## 시작하기
+## 구현 현황
 
 ### Backend
+
+| 기능 | 상태 |
+|---|---|
+| 이메일 회원가입 / 로그인 (JWT) | ✅ |
+| 카카오 · 구글 소셜 로그인 (OAuth2) | ✅ |
+| 농가 CRUD + 관리자 승인 플로우 | ✅ |
+| 상품 CRUD + 실시간 재고 SSE | ✅ |
+| 주문 · 포인트 결제 (트랜잭션) | ✅ |
+| 리뷰 (구매 확인 후 작성) | ✅ |
+| 커뮤니티 게시글 · 댓글 · 좋아요 | ✅ |
+| 이미지 업로드 (로컬 저장) | ✅ |
+| 카카오 주소 검색 API 연동 | ✅ |
+| 관리자 기능 (농가 승인 · 사용자 관리) | ✅ |
+| Swagger UI | ✅ |
+| 로컬 시드 데이터 | ✅ |
+
+### Frontend
+
+| 기능 | 상태 |
+|---|---|
+| React + TypeScript 프로젝트 세팅 | 🔜 |
+
+## 시작하기
+
+### 환경 변수 설정
+
+`backend/src/main/resources/application-local.yml` 에 아래 값을 채워주세요.
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://{host}/{db}
+    username: {username}
+    password: {password}
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: {kakao-client-id}
+            client-secret: {kakao-client-secret}
+          google:
+            client-id: {google-client-id}
+            client-secret: {google-client-secret}
+
+jwt:
+  secret: {32자-이상-시크릿-키}
+
+kakao:
+  address:
+    api-key: {kakao-rest-api-key}
+```
+
+### Backend 실행
+
 ```bash
 cd backend
 ./gradlew bootRun
 ```
 
-### Frontend
+Swagger UI: `http://localhost:8080/api/v1/swagger-ui/index.html`
+
+로컬 프로파일로 실행 시 시드 데이터(관리자 · 농가 3개 · 상품 9개 · 소비자 2개)가 자동 생성됩니다.
+
+### Frontend 실행
+
 ```bash
 cd frontend
 npm install

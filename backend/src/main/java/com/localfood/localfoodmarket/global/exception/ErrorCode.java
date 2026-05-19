@@ -54,6 +54,14 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없어요."),
     COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "본인의 댓글만 삭제할 수 있어요."),
 
+    // 파일 업로드
+    INVALID_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "jpg, jpeg, png 파일만 업로드할 수 있어요."),
+    FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "파일 크기는 10MB 이하여야 해요."),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."),
+
+    // 외부 API
+    KAKAO_API_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "주소 검색 서비스에 일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요."),
+
     // 서버
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
 
