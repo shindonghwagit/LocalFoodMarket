@@ -117,6 +117,17 @@ export interface Comment {
   createdAt: string;
 }
 
+// ── 포인트 ────────────────────────────────────────────────────────────────────
+
+export type PointLogType = 'CHARGE' | 'USE';
+
+export interface PointLog {
+  id: number;
+  amount: number;
+  type: PointLogType;
+  createdAt: string;
+}
+
 // ── 페이지네이션 ──────────────────────────────────────────────────────────────
 
 export interface Page<T> {

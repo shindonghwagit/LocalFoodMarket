@@ -8,14 +8,14 @@ export function useAuth() {
   const { user, isAuthenticated, setAuth, logout: storeLogout } = useAuthStore();
 
   const login = async (email: string, password: string) => {
-    const { data } = await authApi.login(email, password);
+    const { data } = await authApi.login({ email, password });
     const { accessToken, refreshToken, user } = data.data;
     setAuth(user, accessToken, refreshToken);
     redirectAfterLogin(user.role);
   };
 
   const register = async (email: string, password: string, role: Role) => {
-    const { data } = await authApi.register(email, password, role);
+    const { data } = await authApi.register({ email, password, role });
     const { accessToken, refreshToken, user } = data.data;
     setAuth(user, accessToken, refreshToken);
     redirectAfterLogin(user.role);
