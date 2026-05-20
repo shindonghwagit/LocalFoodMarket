@@ -4,7 +4,32 @@
   # Farmer's Market
 
   > 지역 농가와 소비자를 직접 연결하는 직거래 플랫폼
+
+  ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=springboot&logoColor=white)
+  ![React](https://img.shields.io/badge/React_18-61DAFB?style=flat&logo=react&logoColor=black)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
 </div>
+
+---
+
+## 실행 화면
+
+> 스크린샷을 `docs/screenshots/` 폴더에 추가한 뒤 아래 경로를 수정해주세요.
+
+| 홈 화면 | 농가 목록 |
+|:---:|:---:|
+| ![홈](./docs/screenshots/home.png) | ![농가](./docs/screenshots/farms.png) |
+
+| 상품 상세 | 마이페이지 |
+|:---:|:---:|
+| ![상품](./docs/screenshots/product.png) | ![마이페이지](./docs/screenshots/mypage.png) |
+
+| 농가 대시보드 | 관리자 |
+|:---:|:---:|
+| ![대시보드](./docs/screenshots/farm-dashboard.png) | ![관리자](./docs/screenshots/admin.png) |
+
+---
 
 ## 서비스 소개
 
@@ -12,44 +37,66 @@
 농가는 상품을 등록하고, 소비자는 평점·인증 기반으로 농가를 탐색하여 포인트로 구매합니다.
 커뮤니티에서 구매 후기와 레시피를 공유할 수 있습니다.
 
+---
+
 ## 기술 스택
 
 | 영역 | 기술 |
 |---|---|
-| Frontend | React 18 + TypeScript + Tailwind CSS (Vite) |
-| Backend | Spring Boot 3 + Spring Security + JPA |
-| Database | PostgreSQL (Neon) |
+| Frontend | React 18 + TypeScript + Vite + Tailwind CSS v4 |
+| 상태관리 | Zustand |
+| HTTP | Axios |
+| 라우팅 | React Router v6 |
+| Backend | Spring Boot 4 + Spring Security + JPA |
+| Database | PostgreSQL (Neon 클라우드) |
 | 인증 | JWT + OAuth2 (카카오·구글) |
 | 실시간 | SSE (Spring SseEmitter) |
+| 문서 | Swagger UI (springdoc-openapi) |
 | 배포 | Railway (Backend) + Vercel (Frontend) |
 | CI/CD | GitHub Actions |
+
+---
 
 ## 프로젝트 구조
 
 ```
-localfoodmarket/
-├── CLAUDE.md          # Claude Code 컨텍스트
-├── backend/           # Spring Boot
-├── frontend/          # React + TypeScript
+LocalFoodMarket/
+├── backend/                     # Spring Boot
+│   └── src/main/java/com/localfood/
+│       ├── domain/              # user·farm·product·order·review·post·point
+│       └── global/              # config·exception·oauth2·security·util
+├── frontend/                    # React + TypeScript
+│   └── src/
+│       ├── api/                 # axios 인스턴스 + 도메인별 API 함수
+│       ├── components/          # 공통 컴포넌트 (Navbar, Footer …)
+│       ├── pages/               # 페이지 컴포넌트
+│       ├── store/               # Zustand 스토어
+│       ├── hooks/               # 커스텀 훅
+│       └── types/               # TypeScript 타입 정의
 └── docs/
-    ├── ERD.md         # 데이터베이스 설계
-    ├── API.md         # API 명세
+    ├── logo.png
+    ├── ERD.md
+    ├── API.md
     └── ARCHITECTURE.md
 ```
 
+---
+
 ## 주요 기능
 
-- 농가 상점 개설 및 상품 등록·관리
-- 카테고리·인증·평점 기반 농가 탐색
-- 포인트 결제 시스템
-- 실시간 재고 갱신 (SSE)
-- 커뮤니티 게시판 (이미지 업로드, 상품 태그)
-- 카카오·구글 소셜 로그인
-- 관리자 농가 승인·사용자 관리
+- **직거래 쇼핑** — 카테고리·인증·키워드 기반 농가·상품 탐색
+- **포인트 결제** — 주문 시 재고 차감 + 포인트 차감 트랜잭션 원자적 처리
+- **실시간 재고** — SSE로 재고 변동을 구독자에게 즉시 전달
+- **소셜 로그인** — 카카오·구글 OAuth2, tempToken 기반 role 선택 플로우
+- **커뮤니티** — 게시글(이미지·상품 태그)·댓글·좋아요
+- **농가 대시보드** — 주문 알림 SSE, 상품 CRUD
+- **관리자** — 농가 승인·반려, 사용자 관리
+
+---
 
 ## 구현 현황
 
-### Backend
+### Backend ✅ 완료
 
 | 기능 | 상태 |
 |---|---|
@@ -66,11 +113,24 @@ localfoodmarket/
 | Swagger UI | ✅ |
 | 로컬 시드 데이터 | ✅ |
 
-### Frontend
+### Frontend 🚧 진행 중
 
 | 기능 | 상태 |
 |---|---|
-| React + TypeScript 프로젝트 세팅 | 🔜 |
+| Vite + React + TypeScript 프로젝트 세팅 | ✅ |
+| Tailwind CSS v4 + Modern Agrarian 디자인 시스템 | ✅ |
+| axios 인스턴스 + JWT 인터셉터 | ✅ |
+| Zustand 인증 스토어 | ✅ |
+| React Router + PrivateRoute (role 기반) | ✅ |
+| 도메인별 API 함수 (farm·product·order·post) | ✅ |
+| 홈 페이지 UI | ✅ |
+| 로그인 / 회원가입 페이지 | 🔜 |
+| 농가 · 상품 목록 / 상세 페이지 | 🔜 |
+| 마이페이지 / 주문 내역 | 🔜 |
+| 농가 대시보드 | 🔜 |
+| 관리자 페이지 | 🔜 |
+
+---
 
 ## 시작하기
 
@@ -110,9 +170,9 @@ cd backend
 ./gradlew bootRun
 ```
 
-Swagger UI: `http://localhost:8080/api/v1/swagger-ui/index.html`
-
-로컬 프로파일로 실행 시 시드 데이터(관리자 · 농가 3개 · 상품 9개 · 소비자 2개)가 자동 생성됩니다.
+- API: `http://localhost:8080/api/v1`
+- Swagger UI: `http://localhost:8080/api/v1/swagger-ui/index.html`
+- 최초 실행 시 시드 데이터 자동 생성 (관리자 1 · 농가 3 · 상품 9 · 소비자 2)
 
 ### Frontend 실행
 
@@ -121,6 +181,20 @@ cd frontend
 npm install
 npm run dev
 ```
+
+- 개발 서버: `http://localhost:5173`
+
+---
+
+## 시드 계정
+
+| 역할 | 이메일 | 비밀번호 |
+|---|---|---|
+| 관리자 | admin@localfood.com | adminpassword12 |
+| 농가 | farm1@localfood.com | farmerpass12 |
+| 소비자 | consumer1@localfood.com | consumerpass12 |
+
+---
 
 ## 문서
 
