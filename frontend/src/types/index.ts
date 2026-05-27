@@ -45,6 +45,8 @@ export interface Farm {
   certification: string | null;
   description: string | null;
   status: FarmStatus;
+  averageRating?: number;
+  reviewCount?: number;
   createdAt: string;
 }
 
@@ -60,6 +62,7 @@ export interface Product {
   category: string;
   harvestDate: string | null;
   description: string | null;
+  imageUrl?: string;
 }
 
 // ── 주문 ──────────────────────────────────────────────────────────────────────
@@ -87,7 +90,9 @@ export interface Order {
 export interface Review {
   id: number;
   userId: number;
+  authorEmail?: string;
   productId: number;
+  productName?: string;
   orderId: number;
   rating: number;
   content: string;

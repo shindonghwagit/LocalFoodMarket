@@ -7,9 +7,10 @@ export interface FarmParams {
   category?: string;
   certification?: string;
   keyword?: string;
+  sort?: string;
 }
 
-export interface UpdateFarmData {
+export interface FarmData {
   name?: string;
   region?: string;
   category?: string;
@@ -23,5 +24,8 @@ export const getFarms = (params?: FarmParams) =>
 export const getFarm = (id: number) =>
   api.get<ApiResponse<Farm>>(`/farms/${id}`);
 
-export const updateMyFarm = (data: UpdateFarmData) =>
+export const createFarm = (data: FarmData) =>
+  api.post<ApiResponse<Farm>>('/farms', data);
+
+export const updateMyFarm = (data: FarmData) =>
   api.patch<ApiResponse<Farm>>('/farms/me', data);

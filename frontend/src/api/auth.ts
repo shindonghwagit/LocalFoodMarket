@@ -1,5 +1,5 @@
 import api from './axios';
-import type { ApiResponse, AuthResponse, Role } from '../types';
+import type { ApiResponse, AuthResponse, User, Role } from '../types';
 
 export const register = (data: { email: string; password: string; role: Role }) =>
   api.post<ApiResponse<AuthResponse>>('/auth/register', data);
@@ -9,3 +9,6 @@ export const login = (data: { email: string; password: string }) =>
 
 export const completeOAuth2 = (data: { tempToken: string; role: Role }) =>
   api.post<ApiResponse<AuthResponse>>('/auth/oauth2/complete', data);
+
+export const getMe = () =>
+  api.get<ApiResponse<User>>('/users/me');

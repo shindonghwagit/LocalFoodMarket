@@ -23,7 +23,7 @@ public class KakaoAddressClient {
     private final RestTemplate restTemplate;
 
     public List<KakaoAddressResponseDto.Document> searchAddress(String query) {
-        String url = UriComponentsBuilder.fromHttpUrl(config.getUrl())
+        String url = UriComponentsBuilder.fromUriString(config.getUrl())
                 .queryParam("query", query)
                 .toUriString();
 

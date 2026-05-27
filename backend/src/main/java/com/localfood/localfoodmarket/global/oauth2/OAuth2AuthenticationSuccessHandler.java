@@ -25,14 +25,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl;
         if (principal.isNewUser()) {
-            targetUrl = UriComponentsBuilder.fromHttpUrl(frontendUrl + "/oauth2/callback")
+            targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/callback")
                     .queryParam("isNewUser", true)
                     .queryParam("tempToken", principal.getTempToken())
                     .queryParam("provider", principal.getProvider())
                     .queryParam("email", principal.getEmail())
                     .toUriString();
         } else {
-            targetUrl = UriComponentsBuilder.fromHttpUrl(frontendUrl + "/oauth2/callback")
+            targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/callback")
                     .queryParam("accessToken", principal.getAccessToken())
                     .queryParam("refreshToken", principal.getRefreshToken())
                     .toUriString();
