@@ -21,6 +21,9 @@ export interface FarmData {
 export const getFarms = (params?: FarmParams) =>
   api.get<ApiResponse<Page<Farm>>>('/farms', { params });
 
+export const getMyFarm = () =>
+  api.get<ApiResponse<Farm>>('/farms/me');
+
 export const getFarm = (id: number) =>
   api.get<ApiResponse<Farm>>(`/farms/${id}`);
 

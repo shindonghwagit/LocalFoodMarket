@@ -22,6 +22,7 @@ import CommunityWritePage from './pages/CommunityWritePage';
 
 // 농가 전용
 import FarmDashboardPage from './pages/farm/FarmDashboardPage';
+import FarmProductManagePage from './pages/farm/FarmProductManagePage';
 
 // 관리자 전용
 import AdminPage from './pages/admin/AdminPage';
@@ -84,6 +85,7 @@ export default function App() {
           {/* 농가 전용 */}
           <Route element={<PrivateRoute roles={['FARMER']} />}>
             <Route path="/farm/dashboard" element={<FarmDashboardPage />} />
+            <Route path="/farm/products" element={<FarmProductManagePage />} />
           </Route>
         </Route>
 
