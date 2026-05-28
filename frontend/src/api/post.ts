@@ -6,6 +6,8 @@ export interface PostParams {
   size?: number;
   category?: PostCategory;
   keyword?: string;
+  sort?: string;
+  userId?: number;
 }
 
 export interface CreatePostData {
@@ -33,6 +35,9 @@ export const createPost = (data: CreatePostData) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+export const deletePost = (id: number) =>
+  api.delete<ApiResponse<void>>(`/posts/${id}`);
 
 export const toggleLike = (id: number) =>
   api.post<ApiResponse<{ liked: boolean; likes: number }>>(`/posts/${id}/like`);
