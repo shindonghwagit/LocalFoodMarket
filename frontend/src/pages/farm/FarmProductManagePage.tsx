@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Product } from '../../types';
+import api from '../../api/axios';
 import {
   getProducts,
   createProduct,
@@ -97,10 +98,9 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
           if (v !== undefined && v !== '') fd.append(k, String(v));
         });
         fd.append('image', image);
-        const api = isEdit
-          ? import('../../api/axios').then((m) => m.default.patch<any>(`/products/${product!.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } }))
-          : import('../../api/axios').then((m) => m.default.post<any>('/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } }));
-        res = await api;
+        res = isEdit
+          ? await api.patch<any>(`/products/${product!.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+          : await api.post<any>('/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       } else {
         res = isEdit
           ? await updateProduct(product!.id, form)

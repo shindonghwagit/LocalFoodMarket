@@ -7,7 +7,6 @@ import { searchAddress } from '../api/address';
 import type { AddressResult } from '../api/address';
 import { useStockSSE } from '../hooks/useStockSSE';
 import useAuthStore from '../store/authStore';
-import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 

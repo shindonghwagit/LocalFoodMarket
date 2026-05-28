@@ -516,7 +516,6 @@ export default function FarmDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [myFarmId, setMyFarmId] = useState<number | null>(null);
 
   useEffect(() => {
     if (user?.role !== 'FARMER') { navigate('/'); return; }
@@ -527,7 +526,6 @@ export default function FarmDashboardPage() {
     ])
       .then(([ordersRes, farmRes]) => {
         setOrders(ordersRes.data.data.content);
-        setMyFarmId(farmRes.data.data.id);
         return getProducts({ farmId: farmRes.data.data.id, size: 100 });
       })
       .then(({ data }) => setProducts(data.data.content))

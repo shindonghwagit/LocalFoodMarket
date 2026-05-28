@@ -5,7 +5,6 @@ import { getOrders } from '../api/order';
 import { getPosts } from '../api/post';
 import { chargePoint, getPointLogs } from '../api/point';
 import useAuthStore from '../store/authStore';
-import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {

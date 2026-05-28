@@ -148,7 +148,7 @@ export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const postId = Number(id);
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -197,7 +197,7 @@ export default function PostDetailPage() {
   // 이 게시글 태그 상품 중 구매완료된 것
   const reviewableItems = post.taggedProducts?.flatMap((tp) =>
     doneOrders.flatMap((o) =>
-      o.items.filter((i) => i.productId === tp.id).map((i) => ({ productId: tp.id, orderId: o.id, productName: tp.name }))
+      o.items.filter((i) => i.productId === tp.id).map(() => ({ productId: tp.id, orderId: o.id, productName: tp.name }))
     )
   ) ?? [];
 
