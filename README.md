@@ -47,7 +47,7 @@
 | 상태관리 | Zustand |
 | HTTP | Axios |
 | 라우팅 | React Router v6 |
-| Backend | Spring Boot 4 + Spring Security + JPA |
+| Backend | Spring Boot 3.x + Spring Security + JPA |
 | Database | PostgreSQL (Neon 클라우드) |
 | 인증 | JWT + OAuth2 (카카오·구글) |
 | 실시간 | SSE (Spring SseEmitter) |
@@ -113,7 +113,7 @@ LocalFoodMarket/
 | Swagger UI | ✅ |
 | 로컬 시드 데이터 | ✅ |
 
-### Frontend 🚧 진행 중
+### Frontend ✅ 완료
 
 | 기능 | 상태 |
 |---|---|
@@ -122,13 +122,20 @@ LocalFoodMarket/
 | axios 인스턴스 + JWT 인터셉터 | ✅ |
 | Zustand 인증 스토어 | ✅ |
 | React Router + PrivateRoute (role 기반) | ✅ |
-| 도메인별 API 함수 (farm·product·order·post) | ✅ |
-| 홈 페이지 UI | ✅ |
-| 로그인 / 회원가입 페이지 | 🔜 |
-| 농가 · 상품 목록 / 상세 페이지 | 🔜 |
-| 마이페이지 / 주문 내역 | 🔜 |
-| 농가 대시보드 | 🔜 |
-| 관리자 페이지 | 🔜 |
+| 도메인별 API 함수 (farm·product·order·post·point·admin) | ✅ |
+| 홈 페이지 | ✅ |
+| 로그인 / 회원가입 페이지 | ✅ |
+| 소셜 로그인 OAuth2 콜백 처리 | ✅ |
+| 농가 · 상품 목록 / 상세 페이지 | ✅ |
+| 상품 주문 + 카카오 주소 검색 | ✅ |
+| 마이페이지 (주문 내역 · 포인트 · 게시글) | ✅ |
+| 커뮤니티 (목록 · 상세 · 글쓰기) | ✅ |
+| SSE 실시간 재고 · 주문 알림 훅 | ✅ |
+| 농가 대시보드 (통계 · 주문 처리 · 재고 현황 · 매출) | ✅ |
+| 상품 관리 (등록 · 수정 · 삭제 모달) | ✅ |
+| 관리자 페이지 (농가 승인 · 게시글 · 사용자 관리) | ✅ |
+| 환경변수 분리 (.env.local / .env.production) | ✅ |
+| 프로덕션 빌드 최적화 (청크 분리) | ✅ |
 
 ---
 
@@ -183,6 +190,9 @@ npm run dev
 ```
 
 - 개발 서버: `http://localhost:5173`
+
+> `frontend/.env.local` 에 환경변수가 미리 설정되어 있습니다.  
+> 프로덕션 배포 전 `frontend/.env.production` 의 `{railway-domain}` 과 `VITE_KAKAO_ADDRESS_KEY` 를 실제 값으로 교체하세요.
 
 ---
 
