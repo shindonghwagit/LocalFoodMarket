@@ -8,11 +8,10 @@ import useAuthStore from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PAID:      { label: '결제완료', color: 'text-primary' },
-  PREPARING: { label: '준비중',   color: 'text-secondary' },
-  SHIPPED:   { label: '배송중',   color: 'text-tertiary' },
-  DONE:      { label: '배송완료', color: 'text-on-surface-variant' },
-  CANCELLED: { label: '취소됨',   color: 'text-error' },
+  PENDING:  { label: '결제대기', color: 'text-outline' },
+  PAID:     { label: '결제완료', color: 'text-primary' },
+  SHIPPING: { label: '배송중',   color: 'text-tertiary' },
+  DONE:     { label: '배송완료', color: 'text-on-surface-variant' },
 };
 
 const CHARGE_AMOUNTS = [10000, 30000, 50000, 100000];

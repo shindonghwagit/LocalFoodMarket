@@ -67,7 +67,7 @@ export interface Product {
 
 // ── 주문 ──────────────────────────────────────────────────────────────────────
 
-export type OrderStatus = 'PAID' | 'PREPARING' | 'SHIPPED' | 'DONE' | 'CANCELLED';
+export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPING' | 'DONE';
 
 export interface OrderItem {
   productId: number;

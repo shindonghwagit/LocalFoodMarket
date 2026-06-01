@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { PostCategory, Order } from '../types';
 import { createPost } from '../api/post';
@@ -6,7 +6,6 @@ import { getOrders } from '../api/order';
 import Button from '../components/common/Button';
 
 const CATEGORIES: PostCategory[] = ['구매후기', '레시피', '정보공유', '질문'];
-const MAX_IMAGES = 5;
 
 export default function CommunityWritePage() {
   const navigate = useNavigate();
@@ -14,32 +13,14 @@ export default function CommunityWritePage() {
   const [category, setCategory] = useState<PostCategory>('구매후기');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
   const [taggedProductIds, setTaggedProductIds] = useState<number[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getOrders().then(({ data }) => setOrders(data.data.content)).catch(() => {});
   }, []);
-
-  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    const remaining = MAX_IMAGES - images.length;
-    const added = files.slice(0, remaining);
-    setImages((prev) => [...prev, ...added]);
-    setPreviews((prev) => [...prev, ...added.map((f) => URL.createObjectURL(f))]);
-    e.target.value = '';
-  };
-
-  const removeImage = (i: number) => {
-    URL.revokeObjectURL(previews[i]);
-    setImages((prev) => prev.filter((_, idx) => idx !== i));
-    setPreviews((prev) => prev.filter((_, idx) => idx !== i));
-  };
 
   const toggleProduct = (productId: number) => {
     setTaggedProductIds((prev) =>
@@ -54,7 +35,7 @@ export default function CommunityWritePage() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await createPost({ title, content, category, productIds: taggedProductIds, images });
+      const { data } = await createPost({ title, content, category, productIds: taggedProductIds });
       navigate(`/community/${data.data.id}`);
     } catch (err: any) {
       setError(err?.response?.data?.error?.message ?? '게시글 등록에 실패했어요.');
@@ -123,38 +104,6 @@ export default function CommunityWritePage() {
               rows={10}
               className="w-full px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
-          </div>
-
-          {/* 이미지 업로드 */}
-          <div className="flex flex-col gap-xs">
-            <label className="font-label-md text-label-md text-on-surface-variant">
-              이미지 ({images.length}/{MAX_IMAGES})
-            </label>
-            <div className="flex flex-wrap gap-sm">
-              {previews.map((url, i) => (
-                <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-outline-variant">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    className="absolute top-xs right-xs w-6 h-6 bg-error text-on-error rounded-full flex items-center justify-center cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">close</span>
-                  </button>
-                </div>
-              ))}
-              {images.length < MAX_IMAGES && (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="w-24 h-24 rounded-lg border-2 border-dashed border-outline-variant flex flex-col items-center justify-center gap-xs text-on-surface-variant hover:border-primary hover:text-primary transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined">add_photo_alternate</span>
-                  <span className="font-label-sm text-label-sm">추가</span>
-                </button>
-              )}
-            </div>
-            <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={handleImageAdd} />
           </div>
 
           {/* 상품 태그 */}

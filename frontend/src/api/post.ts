@@ -15,7 +15,7 @@ export interface CreatePostData {
   content: string;
   category: PostCategory;
   productIds?: number[];
-  images?: File[];
+  imageUrls?: string[];
 }
 
 export const getPosts = (params?: PostParams) =>
@@ -24,17 +24,14 @@ export const getPosts = (params?: PostParams) =>
 export const getPost = (id: number) =>
   api.get<ApiResponse<Post>>(`/posts/${id}`);
 
-export const createPost = (data: CreatePostData) => {
-  const form = new FormData();
-  form.append('title', data.title);
-  form.append('content', data.content);
-  form.append('category', data.category);
-  data.productIds?.forEach((id) => form.append('productIds', String(id)));
-  data.images?.forEach((file) => form.append('images', file));
-  return api.post<ApiResponse<Post>>('/posts', form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+export const createPost = (data: CreatePostData) =>
+  api.post<ApiResponse<Post>>('/posts', {
+    title: data.title,
+    content: data.content,
+    category: data.category,
+    productIds: data.productIds ?? [],
+    imageUrls: data.imageUrls ?? [],
   });
-};
 
 export const deletePost = (id: number) =>
   api.delete<ApiResponse<void>>(`/posts/${id}`);

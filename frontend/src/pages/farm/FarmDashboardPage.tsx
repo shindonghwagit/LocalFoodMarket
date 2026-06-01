@@ -56,17 +56,15 @@ function Sidebar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
 
 /* ── 주문 상태 라벨 ─────────────────────────────────────────────────────────── */
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PAID:      { label: '결제완료', color: 'text-primary' },
-  PREPARING: { label: '준비중',   color: 'text-secondary' },
-  SHIPPED:   { label: '배송중',   color: 'text-tertiary' },
-  DONE:      { label: '배송완료', color: 'text-on-surface-variant' },
-  CANCELLED: { label: '취소됨',   color: 'text-error' },
+  PENDING:  { label: '결제대기', color: 'text-outline' },
+  PAID:     { label: '결제완료', color: 'text-primary' },
+  SHIPPING: { label: '배송중',   color: 'text-tertiary' },
+  DONE:     { label: '배송완료', color: 'text-on-surface-variant' },
 };
 
 const NEXT_STATUS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  PAID:      { next: 'PREPARING', label: '준비 시작' },
-  PREPARING: { next: 'SHIPPED',   label: '배송 시작' },
-  SHIPPED:   { next: 'DONE',      label: '배송 완료' },
+  PAID:     { next: 'SHIPPING', label: '배송 시작' },
+  SHIPPING: { next: 'DONE',     label: '배송 완료' },
 };
 
 /* ── 대시보드 탭 ────────────────────────────────────────────────────────────── */
@@ -223,12 +221,11 @@ function OrdersTab({
   const filtered = filter ? orders.filter((o) => o.status === filter) : orders;
 
   const statusOptions: { value: OrderStatus | ''; label: string }[] = [
-    { value: '', label: '전체' },
-    { value: 'PAID', label: '결제완료' },
-    { value: 'PREPARING', label: '준비중' },
-    { value: 'SHIPPED', label: '배송중' },
-    { value: 'DONE', label: '배송완료' },
-    { value: 'CANCELLED', label: '취소됨' },
+    { value: '',         label: '전체' },
+    { value: 'PENDING',  label: '결제대기' },
+    { value: 'PAID',     label: '결제완료' },
+    { value: 'SHIPPING', label: '배송중' },
+    { value: 'DONE',     label: '배송완료' },
   ];
 
   if (loading) return <div className="flex justify-center py-xl"><LoadingSpinner size="lg" /></div>;
