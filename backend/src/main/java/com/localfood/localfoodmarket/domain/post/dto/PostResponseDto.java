@@ -20,6 +20,7 @@ public class PostResponseDto {
     private final Integer likes;
     private final Integer viewCount;
     private final boolean blinded;
+    private final boolean liked;
     private final List<String> imageUrls;
     private final List<TaggedProductDto> taggedProducts;
     private final LocalDateTime createdAt;
@@ -41,6 +42,10 @@ public class PostResponseDto {
     }
 
     public static PostResponseDto from(Post post) {
+        return from(post, false);
+    }
+
+    public static PostResponseDto from(Post post, boolean liked) {
         return PostResponseDto.builder()
                 .id(post.getId())
                 .authorEmail(maskEmail(post.getUser().getEmail()))
@@ -50,6 +55,7 @@ public class PostResponseDto {
                 .likes(post.getLikes())
                 .viewCount(post.getViewCount())
                 .blinded(post.isBlinded())
+                .liked(liked)
                 .imageUrls(post.getImages().stream()
                         .map(img -> img.getImageUrl())
                         .toList())

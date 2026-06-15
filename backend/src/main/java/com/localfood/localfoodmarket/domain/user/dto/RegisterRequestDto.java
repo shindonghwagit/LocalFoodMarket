@@ -15,7 +15,7 @@ public class RegisterRequestDto {
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
-    @Size(min = 12, message = "비밀번호는 12자 이상이어야 해요.")
+    @Size(min = 8, message = "비밀번호는 8자 이상이어야 해요.")
     private String password;
 
     @NotNull(message = "역할을 선택해주세요.")

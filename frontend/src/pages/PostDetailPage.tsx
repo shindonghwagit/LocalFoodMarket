@@ -109,9 +109,14 @@ function CommentSection({ postId }: { postId: number }) {
         {comments.map((c) => (
           <div key={c.id} className="bg-white rounded-xl border border-outline-variant p-md">
             <div className="flex items-center justify-between mb-xs">
-              <span className="font-label-md text-label-md text-on-surface-variant">익명</span>
+              <span className="font-label-md text-label-md text-on-surface-variant">
+                {c.authorEmail ?? '익명'}
+              </span>
               <span className="font-label-sm text-label-sm text-outline">
-                {new Date(c.createdAt).toLocaleDateString('ko-KR')}
+                {new Date(c.createdAt).toLocaleString('ko-KR', {
+                  year: 'numeric', month: 'numeric', day: 'numeric',
+                  hour: '2-digit', minute: '2-digit',
+                })}
               </span>
             </div>
             <p className="font-body-md text-body-md text-on-surface">{c.content}</p>
@@ -163,6 +168,7 @@ export default function PostDetailPage() {
       .then(({ data }) => {
         setPost(data.data);
         setLikeCount(data.data.likes);
+        setLiked(!!data.data.liked);
       })
       .catch(() => {})
       .finally(() => setLoading(false));

@@ -28,16 +28,19 @@ public class PostController {
 
     @GetMapping("/posts")
     public ApiResponse<PageResponse<PostResponseDto>> getPosts(
+            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "latest") String sort,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(postService.getPosts(category, keyword, sort, pageable)));
+        return ApiResponse.success(PageResponse.from(postService.getPosts(userId, category, keyword, sort, pageable)));
     }
 
     @GetMapping("/posts/{postId}")
-    public ApiResponse<PostResponseDto> getPost(@PathVariable Long postId) {
-        return ApiResponse.success(postService.getPost(postId));
+    public ApiResponse<PostResponseDto> getPost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal Long userId) {
+        return ApiResponse.success(postService.getPost(postId, userId));
     }
 
     @PostMapping("/posts")

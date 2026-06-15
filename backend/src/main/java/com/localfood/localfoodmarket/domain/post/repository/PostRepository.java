@@ -17,6 +17,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                             @Param("keyword") String keyword,
                             Pageable pageable);
 
+    // 작성자별 조회 — 마이페이지 "내 게시글"
+    @Query("SELECT p FROM Post p WHERE p.blinded = false AND p.user.id = :userId")
+    Page<Post> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
     // 댓글 많은 순 — 서브쿼리 ORDER BY (PostgreSQL native)
     @Query(value = "SELECT * FROM posts" +
                    " WHERE blinded = false" +

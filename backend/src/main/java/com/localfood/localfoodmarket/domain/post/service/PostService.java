@@ -62,10 +62,15 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> getPosts(String category, String keyword, String sort, Pageable pageable) {
+    public Page<PostResponseDto> getPosts(Long userId, String category, String keyword, String sort, Pageable pageable) {
         Page<Post> posts;
 
-        if ("comments".equals(sort)) {
+        if (userId != null) {
+            Pageable byLatest = PageRequest.of(
+                    pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "createdAt"));
+            posts = postRepository.findByUserId(userId, byLatest);
+        } else if ("comments".equals(sort)) {
             Pageable plain = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
             posts = postRepository.findByFilterOrderByCommentCount(category, keyword, plain);
         } else if ("popular".equals(sort)) {
@@ -85,10 +90,16 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto getPost(Long postId) {
+    public PostResponseDto getPost(Long postId, Long currentUserId) {
         Post post = findPost(postId);
         post.incrementViewCount();
-        return PostResponseDto.from(post);
+        boolean liked = false;
+        if (currentUserId != null) {
+            liked = userRepository.findById(currentUserId)
+                    .map(u -> postLikeRepository.existsByUserAndPost(u, post))
+                    .orElse(false);
+        }
+        return PostResponseDto.from(post, liked);
     }
 
     @Transactional

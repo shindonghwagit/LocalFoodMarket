@@ -7,18 +7,20 @@ export function useAuth() {
   const navigate = useNavigate();
   const { user, isAuthenticated, setAuth, logout: storeLogout } = useAuthStore();
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, redirectTo?: string) => {
     const { data } = await authApi.login({ email, password });
     const { accessToken, refreshToken, user } = data.data;
     setAuth(user, accessToken, refreshToken);
-    redirectAfterLogin(user.role);
+    if (redirectTo) navigate(redirectTo);
+    else redirectAfterLogin(user.role);
   };
 
-  const register = async (email: string, password: string, role: Role) => {
+  const register = async (email: string, password: string, role: Role, redirectTo?: string) => {
     const { data } = await authApi.register({ email, password, role });
     const { accessToken, refreshToken, user } = data.data;
     setAuth(user, accessToken, refreshToken);
-    redirectAfterLogin(user.role);
+    if (redirectTo) navigate(redirectTo);
+    else redirectAfterLogin(user.role);
   };
 
   const logout = () => {

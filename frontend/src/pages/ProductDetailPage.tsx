@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import type { Product } from '../types';
 import { getProduct } from '../api/product';
 import { createOrder } from '../api/order';
@@ -7,6 +7,7 @@ import { searchAddress } from '../api/address';
 import type { AddressResult } from '../api/address';
 import { useStockSSE } from '../hooks/useStockSSE';
 import useAuthStore from '../store/authStore';
+import { getMe } from '../api/auth';
 import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -21,6 +22,7 @@ function AddressModal({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<AddressResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,7 @@ function AddressModal({
       setResults([]);
     } finally {
       setLoading(false);
+      setSearched(true);
     }
   };
 
@@ -50,16 +53,21 @@ function AddressModal({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="도로명 또는 지번 주소 입력"
+            placeholder="예: 강남구 테헤란로, 삼성동 159"
             className="flex-1 px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <Button type="submit" loading={loading} size="sm">검색</Button>
         </form>
 
         <div className="max-h-60 overflow-y-auto flex flex-col gap-xs">
-          {results.length === 0 && !loading && (
+          {results.length === 0 && !loading && !searched && (
             <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">
-              주소를 검색해주세요
+              구·동·도로명까지 입력하면 더 잘 찾아요
+            </p>
+          )}
+          {results.length === 0 && !loading && searched && (
+            <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">
+              검색 결과가 없어요. 더 구체적인 주소로 다시 시도해주세요.
             </p>
           )}
           {results.map((r, i) => (
@@ -82,7 +90,8 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const productId = Number(id);
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const location = useLocation();
+  const { user, isAuthenticated, setUser } = useAuthStore();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,12 +116,13 @@ export default function ProductDetailPage() {
   const maxStock = product?.stock ?? 0;
   const stockPct = maxStock > 0 ? Math.min((stock / maxStock) * 100, 100) : 0;
 
+  const isLoggedIn = isAuthenticated && !!user;
   const totalPrice = (product?.price ?? 0) * quantity;
   const hasEnoughPoints = (user?.pointBalance ?? 0) >= totalPrice;
   const fullAddress = detailAddress ? `${address} ${detailAddress}` : address;
 
   const handleOrder = async () => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isLoggedIn) { navigate('/login', { state: { from: location.pathname } }); return; }
     if (!address) { setOrderError('배송지를 입력해주세요.'); return; }
     if (quantity > stock) { setOrderError('재고가 부족해요.'); return; }
     if (!hasEnoughPoints) { setOrderError('포인트가 부족해요.'); return; }
@@ -120,10 +130,14 @@ export default function ProductDetailPage() {
     setOrdering(true);
     setOrderError('');
     try {
-      await createOrder({
+      const { data } = await createOrder({
         deliveryAddress: fullAddress,
         items: [{ productId, quantity }],
       });
+      const remaining = data.data.remainingPoint;
+      if (user && typeof remaining === 'number') {
+        setUser({ ...user, pointBalance: remaining });
+      }
       setOrderSuccess(true);
     } catch (err: any) {
       setOrderError(err?.response?.data?.error?.message ?? '주문에 실패했어요. 다시 시도해주세요.');
@@ -283,7 +297,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* 포인트 */}
-            {isAuthenticated && user && (
+            {isLoggedIn && user && (
               <div className="bg-surface-container-low rounded-xl p-md flex items-center justify-between">
                 <div className="flex items-center gap-sm">
                   <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>loyalty</span>
@@ -311,11 +325,11 @@ export default function ProductDetailPage() {
             <Button
               size="lg"
               className="w-full"
-              disabled={stock === 0 || (!isAuthenticated ? false : !hasEnoughPoints)}
+              disabled={stock === 0 || (isLoggedIn && !hasEnoughPoints)}
               loading={ordering}
               onClick={handleOrder}
             >
-              {!isAuthenticated
+              {!isLoggedIn
                 ? '로그인 후 주문하기'
                 : stock === 0
                 ? '품절'

@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 import java.util.stream.Collectors;
 
@@ -46,6 +47,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.error(code.name(), code.getMessage()));
+    }
+
+    // SSE 등 비동기 요청 타임아웃은 본문 없이 종료 — JSON 직렬화 시도 자체를 막아야 함
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<Void> handleAsyncTimeout(AsyncRequestTimeoutException e) {
+        return ResponseEntity.status(503).build();
     }
 
     @ExceptionHandler(Exception.class)

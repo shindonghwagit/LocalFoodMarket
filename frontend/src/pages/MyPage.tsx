@@ -4,6 +4,7 @@ import type { Order, Post, PointLog } from '../types';
 import { getOrders } from '../api/order';
 import { getPosts } from '../api/post';
 import { chargePoint, getPointLogs } from '../api/point';
+import { getMe } from '../api/auth';
 import useAuthStore from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -97,6 +98,9 @@ function PointTab() {
   const [chargeError, setChargeError] = useState('');
 
   useEffect(() => {
+    getMe()
+      .then(({ data }) => setUser(data.data))
+      .catch(() => {});
     getPointLogs({ size: 20 })
       .then(({ data }) => setLogs(data.data.content))
       .catch(() => {})

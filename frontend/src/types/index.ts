@@ -111,6 +111,7 @@ export interface Post {
   content: string;
   category: PostCategory;
   likes: number;
+  liked?: boolean;
   viewCount: number;
   commentCount?: number;
   imageUrls: string[];
@@ -121,6 +122,7 @@ export interface Post {
 export interface Comment {
   id: number;
   userId: number;
+  authorEmail?: string;
   content: string;
   createdAt: string;
 }

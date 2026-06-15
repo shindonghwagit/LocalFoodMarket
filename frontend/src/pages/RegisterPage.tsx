@@ -36,8 +36,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 12) {
-      setError('비밀번호는 12자 이상이어야 해요.');
+    if (password.length < 8) {
+      setError('비밀번호는 8자 이상이어야 해요.');
       return;
     }
     if (password !== passwordConfirm) {
@@ -117,7 +117,7 @@ export default function RegisterPage() {
               required
             />
             <Input
-              label="비밀번호 (12자 이상)"
+              label="비밀번호 (8자 이상)"
               type="password"
               placeholder="비밀번호를 입력해주세요"
               value={password}

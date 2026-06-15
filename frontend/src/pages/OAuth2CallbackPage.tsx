@@ -29,12 +29,14 @@ export default function OAuth2CallbackPage() {
     }
 
     if (!isNewUser && accessToken && refreshToken) {
-      // 기존 사용자 — 토큰 저장 후 홈으로
+      // 기존 사용자 — 토큰 저장 후 원래 페이지(또는 홈)로
       authApi
         .getMe()
         .then(({ data }) => {
           setAuth(data.data, accessToken, refreshToken);
-          navigate('/', { replace: true });
+          const redirect = sessionStorage.getItem('loginRedirect');
+          sessionStorage.removeItem('loginRedirect');
+          navigate(redirect ?? '/', { replace: true });
         })
         .catch(() => {
           setError('로그인 처리 중 오류가 발생했어요.');
@@ -50,7 +52,10 @@ export default function OAuth2CallbackPage() {
       const { data } = await authApi.completeOAuth2({ tempToken, role });
       const { accessToken, refreshToken, user } = data.data;
       setAuth(user, accessToken, refreshToken);
-      if (role === 'FARMER') navigate('/farm/dashboard', { replace: true });
+      const redirect = sessionStorage.getItem('loginRedirect');
+      sessionStorage.removeItem('loginRedirect');
+      if (redirect && role === 'CONSUMER') navigate(redirect, { replace: true });
+      else if (role === 'FARMER') navigate('/farm/dashboard', { replace: true });
       else navigate('/mypage', { replace: true });
     } catch (err: any) {
       setError(
