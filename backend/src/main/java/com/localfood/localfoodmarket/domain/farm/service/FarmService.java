@@ -6,6 +6,7 @@ import com.localfood.localfoodmarket.domain.farm.dto.FarmUpdateRequestDto;
 import com.localfood.localfoodmarket.domain.farm.entity.Farm;
 import com.localfood.localfoodmarket.domain.farm.entity.FarmStatus;
 import com.localfood.localfoodmarket.domain.farm.repository.FarmRepository;
+import com.localfood.localfoodmarket.domain.review.repository.ReviewRepository;
 import com.localfood.localfoodmarket.domain.user.entity.Role;
 import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
@@ -23,6 +24,7 @@ public class FarmService {
 
     private final FarmRepository farmRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public FarmResponseDto registerFarm(Long userId, FarmRegisterRequestDto request) {
@@ -79,14 +81,20 @@ public class FarmService {
                                           String keyword, Pageable pageable) {
         return farmRepository
                 .findByFilter(FarmStatus.APPROVED, category, certification, keyword, pageable)
-                .map(FarmResponseDto::from);
+                .map(this::toResponseWithStats);
     }
 
     @Transactional(readOnly = true)
     public FarmResponseDto getFarmById(Long farmId) {
         Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FARM_NOT_FOUND));
-        return FarmResponseDto.from(farm);
+        return toResponseWithStats(farm);
+    }
+
+    private FarmResponseDto toResponseWithStats(Farm farm) {
+        Double avg = reviewRepository.findAverageRatingByFarmId(farm.getId()).orElse(null);
+        long count = reviewRepository.countByFarmId(farm.getId());
+        return FarmResponseDto.from(farm, avg, count);
     }
 
     private User findUser(Long userId) {

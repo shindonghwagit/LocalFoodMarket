@@ -2,15 +2,15 @@ package com.localfood.localfoodmarket.domain.post.controller;
 
 import com.localfood.localfoodmarket.domain.post.dto.CommentRequestDto;
 import com.localfood.localfoodmarket.domain.post.dto.CommentResponseDto;
+import com.localfood.localfoodmarket.domain.post.dto.PostLikeToggleResponseDto;
 import com.localfood.localfoodmarket.domain.post.dto.PostRequestDto;
 import com.localfood.localfoodmarket.domain.post.dto.PostResponseDto;
 import com.localfood.localfoodmarket.domain.post.service.PostService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,12 +27,12 @@ public class PostController {
     // ── 게시글 ──────────────────────────────────────────────────────────────
 
     @GetMapping("/posts")
-    public ApiResponse<Page<PostResponseDto>> getPosts(
+    public ApiResponse<PageResponse<PostResponseDto>> getPosts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "latest") String sort,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ApiResponse.success(postService.getPosts(category, keyword, sort, pageable));
+        return ApiResponse.success(PageResponse.from(postService.getPosts(category, keyword, sort, pageable)));
     }
 
     @GetMapping("/posts/{postId}")
@@ -65,8 +65,10 @@ public class PostController {
     }
 
     @PostMapping("/posts/{postId}/like")
-    public ApiResponse<PostResponseDto> toggleLike(@PathVariable Long postId) {
-        return ApiResponse.success(postService.toggleLike(postId), "좋아요가 반영됐어요.");
+    public ApiResponse<PostLikeToggleResponseDto> toggleLike(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long postId) {
+        return ApiResponse.success(postService.toggleLike(userId, postId), "좋아요가 반영됐어요.");
     }
 
     // ── 댓글 ──────────────────────────────────────────────────────────────

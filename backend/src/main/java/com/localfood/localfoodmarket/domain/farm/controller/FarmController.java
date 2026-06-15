@@ -5,9 +5,9 @@ import com.localfood.localfoodmarket.domain.farm.dto.FarmResponseDto;
 import com.localfood.localfoodmarket.domain.farm.dto.FarmUpdateRequestDto;
 import com.localfood.localfoodmarket.domain.farm.service.FarmService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -31,12 +31,12 @@ public class FarmController {
     }
 
     @GetMapping
-    public ApiResponse<Page<FarmResponseDto>> getFarms(
+    public ApiResponse<PageResponse<FarmResponseDto>> getFarms(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String certification,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(farmService.getFarms(category, certification, keyword, pageable));
+        return ApiResponse.success(PageResponse.from(farmService.getFarms(category, certification, keyword, pageable)));
     }
 
     @GetMapping("/{farmId}")

@@ -5,9 +5,9 @@ import com.localfood.localfoodmarket.domain.order.dto.OrderResponseDto;
 import com.localfood.localfoodmarket.domain.order.dto.OrderStatusUpdateRequestDto;
 import com.localfood.localfoodmarket.domain.order.service.OrderService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -31,10 +31,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public ApiResponse<Page<OrderResponseDto>> getOrders(
+    public ApiResponse<PageResponse<OrderResponseDto>> getOrders(
             @AuthenticationPrincipal Long userId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(orderService.getOrders(userId, pageable));
+        return ApiResponse.success(PageResponse.from(orderService.getOrders(userId, pageable)));
     }
 
     @GetMapping("/{orderId}")

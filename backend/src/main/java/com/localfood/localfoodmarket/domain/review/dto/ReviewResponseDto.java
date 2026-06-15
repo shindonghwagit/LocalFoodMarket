@@ -11,8 +11,11 @@ import java.time.LocalDateTime;
 public class ReviewResponseDto {
 
     private final Long id;
+    private final Long userId;
     private final Long productId;
-    private final String authorName;   // 이메일 마스킹 처리
+    private final String productName;
+    private final Long orderId;
+    private final String authorEmail;
     private final Integer rating;
     private final String content;
     private final LocalDateTime createdAt;
@@ -20,8 +23,11 @@ public class ReviewResponseDto {
     public static ReviewResponseDto from(Review review) {
         return ReviewResponseDto.builder()
                 .id(review.getId())
+                .userId(review.getUser().getId())
                 .productId(review.getProduct().getId())
-                .authorName(maskEmail(review.getUser().getEmail()))
+                .productName(review.getProduct().getName())
+                .orderId(review.getOrder().getId())
+                .authorEmail(maskEmail(review.getUser().getEmail()))
                 .rating(review.getRating())
                 .content(review.getContent())
                 .createdAt(review.getCreatedAt())

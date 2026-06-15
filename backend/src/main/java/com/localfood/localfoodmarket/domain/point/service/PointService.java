@@ -1,11 +1,11 @@
 package com.localfood.localfoodmarket.domain.point.service;
 
+import com.localfood.localfoodmarket.domain.point.dto.PointBalanceResponseDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointChargeRequestDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointLogResponseDto;
 import com.localfood.localfoodmarket.domain.point.entity.PointLog;
 import com.localfood.localfoodmarket.domain.point.entity.PointType;
 import com.localfood.localfoodmarket.domain.point.repository.PointLogRepository;
-import com.localfood.localfoodmarket.domain.user.entity.Role;
 import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
 import com.localfood.localfoodmarket.global.exception.BusinessException;
@@ -40,25 +40,20 @@ public class PointService {
     }
 
     @Transactional
-    public PointLogResponseDto chargePoint(Long adminUserId, PointChargeRequestDto request) {
-        User admin = findUser(adminUserId);
+    public PointBalanceResponseDto chargePoint(Long userId, PointChargeRequestDto request) {
+        User user = findUser(userId);
 
-        if (admin.getRole() != Role.ADMIN) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "관리자만 포인트를 충전할 수 있어요.");
-        }
+        user.chargePoint(request.getAmount());
 
-        User target = userRepository.findById(request.getTargetUserId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "대상 사용자를 찾을 수 없어요."));
-
-        target.chargePoint(request.getAmount());
-
-        PointLog log = pointLogRepository.save(PointLog.builder()
-                .user(target)
+        pointLogRepository.save(PointLog.builder()
+                .user(user)
                 .amount(request.getAmount())
                 .type(PointType.CHARGE)
                 .build());
 
-        return PointLogResponseDto.from(log);
+        return PointBalanceResponseDto.builder()
+                .pointBalance(user.getPointBalance())
+                .build();
     }
 
     private User findUser(Long userId) {

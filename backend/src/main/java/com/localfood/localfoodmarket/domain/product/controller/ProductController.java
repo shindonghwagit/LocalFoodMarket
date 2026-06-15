@@ -4,9 +4,9 @@ import com.localfood.localfoodmarket.domain.product.dto.ProductRequestDto;
 import com.localfood.localfoodmarket.domain.product.dto.ProductResponseDto;
 import com.localfood.localfoodmarket.domain.product.service.ProductService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -46,12 +46,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ApiResponse<Page<ProductResponseDto>> getProducts(
+    public ApiResponse<PageResponse<ProductResponseDto>> getProducts(
             @RequestParam(required = false) Long farmId,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(productService.getProducts(farmId, category, keyword, pageable));
+        return ApiResponse.success(PageResponse.from(productService.getProducts(farmId, category, keyword, pageable)));
     }
 
     @GetMapping("/{productId}")

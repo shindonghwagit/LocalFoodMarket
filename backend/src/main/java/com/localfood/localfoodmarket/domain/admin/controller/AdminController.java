@@ -8,9 +8,9 @@ import com.localfood.localfoodmarket.domain.farm.dto.FarmResponseDto;
 import com.localfood.localfoodmarket.domain.farm.entity.FarmStatus;
 import com.localfood.localfoodmarket.domain.user.dto.UserResponseDto;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -25,10 +25,10 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/farms")
-    public ApiResponse<Page<FarmResponseDto>> getFarms(
+    public ApiResponse<PageResponse<FarmResponseDto>> getFarms(
             @RequestParam(required = false) FarmStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(adminService.getFarms(status, pageable));
+        return ApiResponse.success(PageResponse.from(adminService.getFarms(status, pageable)));
     }
 
     @PatchMapping("/farms/{farmId}/status")
@@ -40,9 +40,9 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ApiResponse<Page<UserResponseDto>> getUsers(
+    public ApiResponse<PageResponse<UserResponseDto>> getUsers(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(adminService.getUsers(pageable));
+        return ApiResponse.success(PageResponse.from(adminService.getUsers(pageable)));
     }
 
     @PatchMapping("/users/{userId}/role")

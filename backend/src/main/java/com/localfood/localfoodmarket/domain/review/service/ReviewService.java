@@ -79,6 +79,12 @@ public class ReviewService {
                 .map(ReviewResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDto> getReviewsByFarm(Long farmId, Pageable pageable) {
+        return reviewRepository.findByFarmId(farmId, pageable)
+                .map(ReviewResponseDto::from);
+    }
+
     @Transactional
     public void deleteReview(Long userId, Long reviewId) {
         User user = findUser(userId);

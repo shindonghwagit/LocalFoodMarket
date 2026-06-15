@@ -2,13 +2,16 @@ package com.localfood.localfoodmarket.domain.post.service;
 
 import com.localfood.localfoodmarket.domain.post.dto.CommentRequestDto;
 import com.localfood.localfoodmarket.domain.post.dto.CommentResponseDto;
+import com.localfood.localfoodmarket.domain.post.dto.PostLikeToggleResponseDto;
 import com.localfood.localfoodmarket.domain.post.dto.PostRequestDto;
 import com.localfood.localfoodmarket.domain.post.dto.PostResponseDto;
 import com.localfood.localfoodmarket.domain.post.entity.Comment;
 import com.localfood.localfoodmarket.domain.post.entity.Post;
 import com.localfood.localfoodmarket.domain.post.entity.PostImage;
+import com.localfood.localfoodmarket.domain.post.entity.PostLike;
 import com.localfood.localfoodmarket.domain.post.entity.PostProduct;
 import com.localfood.localfoodmarket.domain.post.repository.CommentRepository;
+import com.localfood.localfoodmarket.domain.post.repository.PostLikeRepository;
 import com.localfood.localfoodmarket.domain.post.repository.PostRepository;
 import com.localfood.localfoodmarket.domain.product.entity.Product;
 import com.localfood.localfoodmarket.domain.product.repository.ProductRepository;
@@ -32,6 +35,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -121,11 +125,26 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto toggleLike(Long postId) {
-        // NOTE: 중복 방지 토글은 post_likes 추적 테이블 필요 — ERD에 없으므로 단순 증가로 구현
+    public PostLikeToggleResponseDto toggleLike(Long userId, Long postId) {
+        User user = findUser(userId);
         Post post = findPost(postId);
-        post.incrementLikes();
-        return PostResponseDto.from(post);
+
+        boolean nowLiked;
+        var existing = postLikeRepository.findByUserAndPost(user, post);
+        if (existing.isPresent()) {
+            postLikeRepository.delete(existing.get());
+            post.decrementLikes();
+            nowLiked = false;
+        } else {
+            postLikeRepository.save(PostLike.builder().user(user).post(post).build());
+            post.incrementLikes();
+            nowLiked = true;
+        }
+
+        return PostLikeToggleResponseDto.builder()
+                .liked(nowLiked)
+                .likes(post.getLikes())
+                .build();
     }
 
     @Transactional(readOnly = true)

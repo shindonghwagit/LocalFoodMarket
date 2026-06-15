@@ -4,9 +4,9 @@ import com.localfood.localfoodmarket.domain.review.dto.ReviewRequestDto;
 import com.localfood.localfoodmarket.domain.review.dto.ReviewResponseDto;
 import com.localfood.localfoodmarket.domain.review.service.ReviewService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -30,10 +30,24 @@ public class ReviewController {
     }
 
     @GetMapping("/products/{productId}")
-    public ApiResponse<Page<ReviewResponseDto>> getReviews(
+    public ApiResponse<PageResponse<ReviewResponseDto>> getReviewsByProductPath(
             @PathVariable Long productId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(reviewService.getReviews(productId, pageable));
+        return ApiResponse.success(PageResponse.from(reviewService.getReviews(productId, pageable)));
+    }
+
+    @GetMapping
+    public ApiResponse<PageResponse<ReviewResponseDto>> getReviews(
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Long farmId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        if (farmId != null) {
+            return ApiResponse.success(PageResponse.from(reviewService.getReviewsByFarm(farmId, pageable)));
+        }
+        if (productId != null) {
+            return ApiResponse.success(PageResponse.from(reviewService.getReviews(productId, pageable)));
+        }
+        return ApiResponse.success(PageResponse.from(org.springframework.data.domain.Page.<ReviewResponseDto>empty(pageable)));
     }
 
     @DeleteMapping("/{reviewId}")

@@ -20,9 +20,15 @@ public class FarmResponseDto {
     private final String certification;
     private final FarmStatus status;
     private final String description;
+    private final Double averageRating;
+    private final Long reviewCount;
     private final LocalDateTime createdAt;
 
     public static FarmResponseDto from(Farm farm) {
+        return from(farm, null, null);
+    }
+
+    public static FarmResponseDto from(Farm farm, Double averageRating, Long reviewCount) {
         return FarmResponseDto.builder()
                 .id(farm.getId())
                 .userId(farm.getUser().getId())
@@ -33,6 +39,8 @@ public class FarmResponseDto {
                 .certification(farm.getCertification())
                 .status(farm.getStatus())
                 .description(farm.getDescription())
+                .averageRating(averageRating)
+                .reviewCount(reviewCount)
                 .createdAt(farm.getCreatedAt())
                 .build();
     }

@@ -1,13 +1,14 @@
 package com.localfood.localfoodmarket.domain.point.controller;
 
+import com.localfood.localfoodmarket.domain.point.dto.PointBalanceResponseDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointChargeRequestDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointLogResponseDto;
 import com.localfood.localfoodmarket.domain.point.entity.PointType;
 import com.localfood.localfoodmarket.domain.point.service.PointService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import com.localfood.localfoodmarket.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -30,16 +31,16 @@ public class PointController {
     }
 
     @GetMapping("/logs")
-    public ApiResponse<Page<PointLogResponseDto>> getLogs(
+    public ApiResponse<PageResponse<PointLogResponseDto>> getLogs(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) PointType type,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(pointService.getLogs(userId, type, pageable));
+        return ApiResponse.success(PageResponse.from(pointService.getLogs(userId, type, pageable)));
     }
 
     @PostMapping("/charge")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<PointLogResponseDto> charge(
+    public ApiResponse<PointBalanceResponseDto> charge(
             @AuthenticationPrincipal Long userId,
             @RequestBody @Valid PointChargeRequestDto request) {
         return ApiResponse.success(pointService.chargePoint(userId, request), "포인트가 충전됐어요.");
