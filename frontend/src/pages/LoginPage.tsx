@@ -26,6 +26,7 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(
         err?.response?.data?.error?.message ??
+          err?.message ??
           '로그인에 실패했어요. 이메일과 비밀번호를 확인해주세요.',
       );
     } finally {

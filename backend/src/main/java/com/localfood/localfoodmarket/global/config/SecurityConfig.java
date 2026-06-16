@@ -6,6 +6,7 @@ import com.localfood.localfoodmarket.global.oauth2.OAuth2AuthenticationSuccessHa
 import com.localfood.localfoodmarket.global.security.JwtAuthenticationFilter;
 import com.localfood.localfoodmarket.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,6 +34,12 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
+    @Value("${app.origin.user:http://localhost:5173}")
+    private String userOrigin;
+
+    @Value("${app.origin.admin:http://localhost:5174}")
+    private String adminOrigin;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -54,6 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/address/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/files/**").hasAnyRole("CONSUMER", "FARMER")
+                        // 관리자 엔드포인트는 ADMIN 권한 필수
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
@@ -75,14 +84,23 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        // 일반 엔드포인트: user / admin 두 origin 모두 허용
+        CorsConfiguration shared = new CorsConfiguration();
+        shared.setAllowedOrigins(List.of(userOrigin, adminOrigin));
+        shared.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        shared.setAllowedHeaders(List.of("*"));
+        shared.setAllowCredentials(true);
+
+        // /admin/** 은 admin origin 만 허용
+        CorsConfiguration adminOnly = new CorsConfiguration();
+        adminOnly.setAllowedOrigins(List.of(adminOrigin));
+        adminOnly.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        adminOnly.setAllowedHeaders(List.of("*"));
+        adminOnly.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/admin/**", adminOnly);
+        source.registerCorsConfiguration("/**", shared);
         return source;
     }
 

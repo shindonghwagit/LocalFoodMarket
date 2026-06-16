@@ -44,6 +44,9 @@ jwt:
 
 app:
   frontend-url: http://localhost:5173
+  origin:
+    user: ${APP_ORIGIN_USER:http://localhost:5173}
+    admin: ${APP_ORIGIN_ADMIN:http://localhost:5174}
 
 file:
   upload-dir: uploads/

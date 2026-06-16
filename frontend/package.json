@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:admin": "cross-env VITE_APP_MODE=admin vite",
     "build": "tsc -b && vite build",
+    "build:user": "tsc -b && cross-env VITE_APP_MODE=user vite build",
+    "build:admin": "tsc -b && cross-env VITE_APP_MODE=admin vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -17,6 +20,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^24.12.3",
