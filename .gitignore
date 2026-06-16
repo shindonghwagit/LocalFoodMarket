@@ -43,10 +43,9 @@ CLAUDE.md
 .claude/
 
 # ================================
-# Docker (contains credentials)
+# Docker overrides (local 개발자 개별 설정)
 # ================================
-docker-compose.yml
-docker-compose.*.yml
+docker-compose.override.yml
 
 # ================================
 # Environment
