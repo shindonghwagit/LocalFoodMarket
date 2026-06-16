@@ -132,7 +132,7 @@ order_id + product_id 조합으로 구매 여부 확인
 
 ### 비밀번호 정책 (NIST SP 800-63B)
 ```
-최소 12자 이상
+최소 8자 이상
 연속·반복 문자 차단 (123456, aaaaaa 등)
 특수문자 강제 없음
 소셜 전용 계정은 password_hash = NULL

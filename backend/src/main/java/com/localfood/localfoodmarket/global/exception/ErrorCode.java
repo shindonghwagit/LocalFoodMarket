@@ -17,7 +17,7 @@ public enum ErrorCode {
 
     // 입력값
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "입력값을 다시 확인해주세요."),
-    PASSWORD_TOO_SIMPLE(HttpStatus.BAD_REQUEST, "비밀번호가 너무 단순해요. 12자 이상으로 설정해주세요."),
+    PASSWORD_TOO_SIMPLE(HttpStatus.BAD_REQUEST, "비밀번호가 너무 단순해요. 8자 이상으로 설정해주세요."),
 
     // 회원·소셜
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일이에요."),
