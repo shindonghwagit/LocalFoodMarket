@@ -116,7 +116,7 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-gutter bg-black/50">
-      <div className="bg-white rounded-2xl w-full max-w-xl p-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-[36rem] p-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-lg">
           <h2 className="font-headline-sm text-headline-sm text-on-surface">
             {isEdit ? '상품 수정' : '상품 등록'}
@@ -266,7 +266,7 @@ function DeleteConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-gutter bg-black/50">
-      <div className="bg-white rounded-2xl w-full max-w-sm p-lg shadow-xl">
+      <div className="bg-white rounded-2xl w-full max-w-[24rem] p-lg shadow-xl">
         <div className="flex flex-col items-center text-center gap-md">
           <span className="material-symbols-outlined text-[48px] text-error" style={{ fontVariationSettings: "'FILL' 1" }}>
             delete_forever
