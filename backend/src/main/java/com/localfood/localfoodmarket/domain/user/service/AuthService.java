@@ -104,6 +104,11 @@ public class AuthService {
                     "이메일 또는 비밀번호가 올바르지 않아요.");
         }
 
+        if (user.isSuspended()) {
+            throw new BusinessException(ErrorCode.FORBIDDEN,
+                    "정지된 계정이에요. 관리자에게 문의해주세요.");
+        }
+
         return issueTokens(user);
     }
 

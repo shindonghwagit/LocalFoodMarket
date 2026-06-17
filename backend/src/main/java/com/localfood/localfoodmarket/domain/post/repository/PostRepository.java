@@ -7,7 +7,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
+
+    long countByCreatedAtAfter(LocalDateTime dateTime);
+
+    long countByReportCountGreaterThan(int threshold);
+
+    // 관리자용 — blinded 포함 전체 조회, 신고 많은 순 → 최신 순
+    @Query("SELECT p FROM Post p ORDER BY p.reportCount DESC, p.createdAt DESC")
+    Page<Post> findAllForAdmin(Pageable pageable);
 
     // 카테고리·키워드 필터 — Pageable로 정렬(latest·popular) 제어
     @Query("SELECT p FROM Post p WHERE p.blinded = false" +

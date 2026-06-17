@@ -43,6 +43,9 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private boolean blinded = false;
 
+    @Column(name = "report_count", nullable = false, columnDefinition = "integer default 0")
+    private Integer reportCount = 0;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     private List<PostImage> images = new ArrayList<>();
@@ -59,6 +62,7 @@ public class Post extends BaseEntity {
         this.likes = 0;
         this.viewCount = 0;
         this.blinded = false;
+        this.reportCount = 0;
     }
 
     public void update(String title, String content, String category) {
@@ -101,5 +105,9 @@ public class Post extends BaseEntity {
 
     public void unblind() {
         this.blinded = false;
+    }
+
+    public void incrementReportCount() {
+        this.reportCount++;
     }
 }

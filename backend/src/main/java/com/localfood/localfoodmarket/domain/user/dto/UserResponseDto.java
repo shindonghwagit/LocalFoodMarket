@@ -16,6 +16,7 @@ public class UserResponseDto {
     private final String email;
     private final Role role;
     private final Long pointBalance;
+    private final boolean suspended;
     private final List<String> connectedProviders;
     private final LocalDateTime createdAt;
 
@@ -25,6 +26,7 @@ public class UserResponseDto {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .pointBalance(user.getPointBalance())
+                .suspended(user.isSuspended())
                 .connectedProviders(List.of())
                 .createdAt(user.getCreatedAt())
                 .build();
@@ -37,6 +39,7 @@ public class UserResponseDto {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .pointBalance(user.getPointBalance())
+                .suspended(user.isSuspended())
                 .connectedProviders(connectedProviders)
                 .createdAt(user.getCreatedAt())
                 .build();

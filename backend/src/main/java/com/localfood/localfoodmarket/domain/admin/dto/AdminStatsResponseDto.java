@@ -7,7 +7,12 @@ import lombok.Getter;
 @Builder
 public class AdminStatsResponseDto {
 
-    private final long userCount;
-    private final long farmCount;
-    private final long todayOrderCount;
+    private final long totalFarms;
+    private final long pendingFarms;
+    private final long totalUsers;
+    private final long reportedPosts;
+    private final long todaySignups;
+    private final long todayOrders;
+    private final long todayRevenue;
+    private final long todayPosts;
 }

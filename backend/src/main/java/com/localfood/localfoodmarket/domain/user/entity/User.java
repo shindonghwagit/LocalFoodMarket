@@ -31,12 +31,16 @@ public class User extends BaseEntity {
     @Column(name = "point_balance", nullable = false)
     private Long pointBalance = 0L;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean suspended = false;
+
     @Builder
     private User(String email, String passwordHash, Role role) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
         this.pointBalance = 0L;
+        this.suspended = false;
     }
 
     public void updateEmail(String email) {
@@ -57,5 +61,13 @@ public class User extends BaseEntity {
 
     public void chargePoint(long amount) {
         this.pointBalance += amount;
+    }
+
+    public void suspend() {
+        this.suspended = true;
+    }
+
+    public void unsuspend() {
+        this.suspended = false;
     }
 }

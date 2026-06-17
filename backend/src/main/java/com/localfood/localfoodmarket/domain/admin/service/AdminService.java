@@ -1,5 +1,6 @@
 package com.localfood.localfoodmarket.domain.admin.service;
 
+import com.localfood.localfoodmarket.domain.admin.dto.AdminPostResponseDto;
 import com.localfood.localfoodmarket.domain.admin.dto.AdminStatsResponseDto;
 import com.localfood.localfoodmarket.domain.admin.dto.FarmStatusUpdateRequestDto;
 import com.localfood.localfoodmarket.domain.admin.dto.UserRoleUpdateRequestDto;
@@ -60,8 +61,26 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponseDto> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserResponseDto::from);
+    public Page<UserResponseDto> getUsers(String keyword, Pageable pageable) {
+        Page<User> users = (keyword == null || keyword.isBlank())
+                ? userRepository.findAll(pageable)
+                : userRepository.findByEmailContainingIgnoreCase(keyword.trim(), pageable);
+        return users.map(UserResponseDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AdminPostResponseDto> getPosts(Pageable pageable) {
+        return postRepository.findAllForAdmin(pageable).map(AdminPostResponseDto::from);
+    }
+
+    @Transactional
+    public void suspendUser(Long targetUserId) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "사용자 정보를 찾을 수 없어요."));
+        if (user.getRole() == Role.ADMIN) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "관리자 계정은 정지할 수 없어요.");
+        }
+        user.suspend();
     }
 
     @Transactional
@@ -85,9 +104,14 @@ public class AdminService {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
 
         return AdminStatsResponseDto.builder()
-                .userCount(userRepository.count())
-                .farmCount(farmRepository.count())
-                .todayOrderCount(orderRepository.countByCreatedAtAfter(startOfToday))
+                .totalFarms(farmRepository.count())
+                .pendingFarms(farmRepository.countByStatus(FarmStatus.PENDING))
+                .totalUsers(userRepository.count())
+                .reportedPosts(postRepository.countByReportCountGreaterThan(0))
+                .todaySignups(userRepository.countByCreatedAtAfter(startOfToday))
+                .todayOrders(orderRepository.countByCreatedAtAfter(startOfToday))
+                .todayRevenue(orderRepository.sumTotalPriceSince(startOfToday))
+                .todayPosts(postRepository.countByCreatedAtAfter(startOfToday))
                 .build();
     }
 

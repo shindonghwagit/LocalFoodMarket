@@ -1,5 +1,6 @@
 package com.localfood.localfoodmarket.domain.admin.controller;
 
+import com.localfood.localfoodmarket.domain.admin.dto.AdminPostResponseDto;
 import com.localfood.localfoodmarket.domain.admin.dto.AdminStatsResponseDto;
 import com.localfood.localfoodmarket.domain.admin.dto.FarmStatusUpdateRequestDto;
 import com.localfood.localfoodmarket.domain.admin.dto.UserRoleUpdateRequestDto;
@@ -41,8 +42,9 @@ public class AdminController {
 
     @GetMapping("/users")
     public ApiResponse<PageResponse<UserResponseDto>> getUsers(
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(adminService.getUsers(pageable)));
+        return ApiResponse.success(PageResponse.from(adminService.getUsers(keyword, pageable)));
     }
 
     @PatchMapping("/users/{userId}/role")
@@ -50,6 +52,18 @@ public class AdminController {
             @PathVariable Long userId,
             @RequestBody @Valid UserRoleUpdateRequestDto request) {
         return ApiResponse.success(adminService.updateUserRole(userId, request), "사용자 권한이 변경됐어요.");
+    }
+
+    @PatchMapping("/users/{userId}/suspend")
+    public ApiResponse<Void> suspendUser(@PathVariable Long userId) {
+        adminService.suspendUser(userId);
+        return ApiResponse.<Void>success(null, "사용자 계정이 정지됐어요.");
+    }
+
+    @GetMapping("/posts")
+    public ApiResponse<PageResponse<AdminPostResponseDto>> getPosts(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(PageResponse.from(adminService.getPosts(pageable)));
     }
 
     @DeleteMapping("/posts/{postId}")

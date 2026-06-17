@@ -5,6 +5,8 @@ import com.localfood.localfoodmarket.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,4 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndUser(Long id, User user);
 
     long countByCreatedAtAfter(LocalDateTime dateTime);
+
+    @Query("SELECT COALESCE(SUM(o.totalPrice), 0) FROM Order o WHERE o.createdAt >= :since")
+    long sumTotalPriceSince(@Param("since") LocalDateTime since);
 }
