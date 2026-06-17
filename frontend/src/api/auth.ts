@@ -1,7 +1,19 @@
+import type { AxiosRequestConfig } from 'axios';
 import api from './axios';
 import type { ApiResponse, AuthResponse, User, Role } from '../types';
 
-export const register = (data: { email: string; password: string; role: Role }) =>
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  role: Role;
+  farmName?: string;
+  region?: string;
+  category?: string;
+  certification?: string;
+  description?: string;
+}
+
+export const register = (data: RegisterPayload) =>
   api.post<ApiResponse<AuthResponse>>('/auth/register', data);
 
 export const login = (data: { email: string; password: string }) =>

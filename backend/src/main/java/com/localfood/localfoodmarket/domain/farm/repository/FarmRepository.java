@@ -20,11 +20,13 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
 
     Page<Farm> findByStatus(FarmStatus status, Pageable pageable);
 
+    long countByStatus(FarmStatus status);
+
     boolean existsByUser(User user);
 
     @Query("SELECT f FROM Farm f WHERE f.status = :status" +
-           " AND (:category IS NULL OR f.category = :category)" +
-           " AND (:certification IS NULL OR f.certification = :certification)" +
+           " AND (:category IS NULL OR f.category LIKE %:category%)" +
+           " AND (:certification IS NULL OR f.certification LIKE %:certification%)" +
            " AND (:keyword IS NULL OR f.name LIKE %:keyword% OR f.region LIKE %:keyword%)")
     Page<Farm> findByFilter(@Param("status") FarmStatus status,
                             @Param("category") String category,

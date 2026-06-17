@@ -1,5 +1,7 @@
 package com.localfood.localfoodmarket.domain.user.service;
 
+import com.localfood.localfoodmarket.domain.farm.entity.Farm;
+import com.localfood.localfoodmarket.domain.farm.repository.FarmRepository;
 import com.localfood.localfoodmarket.domain.user.dto.AuthResponseDto;
 import com.localfood.localfoodmarket.domain.user.dto.LoginRequestDto;
 import com.localfood.localfoodmarket.domain.user.dto.OAuth2CompleteRequestDto;
@@ -23,6 +25,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final SocialAccountRepository socialAccountRepository;
+    private final FarmRepository farmRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -30,6 +33,14 @@ public class AuthService {
     public AuthResponseDto register(RegisterRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        if (request.getRole() == Role.ADMIN) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "해당 역할로는 가입할 수 없어요.");
+        }
+
+        if (request.getRole() == Role.FARMER) {
+            validateFarmFields(request);
         }
 
         validatePasswordStrength(request.getPassword());
@@ -42,7 +53,39 @@ public class AuthService {
 
         userRepository.save(user);
 
+        if (request.getRole() == Role.FARMER) {
+            Farm farm = Farm.builder()
+                    .user(user)
+                    .name(request.getFarmName().trim())
+                    .region(request.getRegion().trim())
+                    .category(request.getCategory().trim())
+                    .certification(blankToNull(request.getCertification()))
+                    .description(blankToNull(request.getDescription()))
+                    .build();
+            farmRepository.save(farm);
+        }
+
         return issueTokens(user);
+    }
+
+    private void validateFarmFields(RegisterRequestDto request) {
+        if (isBlank(request.getFarmName())) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "농장명을 입력해주세요.");
+        }
+        if (isBlank(request.getRegion())) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "지역을 입력해주세요.");
+        }
+        if (isBlank(request.getCategory())) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "카테고리를 선택해주세요.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private String blankToNull(String value) {
+        return isBlank(value) ? null : value.trim();
     }
 
     @Transactional(readOnly = true)

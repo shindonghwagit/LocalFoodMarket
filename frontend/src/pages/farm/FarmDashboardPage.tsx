@@ -298,34 +298,60 @@ function OrdersTab({
 }
 
 /* ── 농가 정보 탭 ────────────────────────────────────────────────────────────── */
+const FARM_CATEGORIES = ['채소', '과일', '곡류', '축산', '수산', '기타'];
+const CERTIFICATIONS = ['무농약', '유기농', 'GAP인증', '친환경'];
+
+const splitTags = (value?: string | null): string[] =>
+  value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [];
+
 function InfoTab() {
   const [farm, setFarm] = useState<Farm | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', region: '', category: '', description: '' });
+  const [name, setName] = useState('');
+  const [region, setRegion] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<string[]>([]);
+  const [description, setDescription] = useState('');
   const [error, setError] = useState('');
+
+  const hydrate = (f: Farm) => {
+    setName(f.name);
+    setRegion(f.region);
+    setCategories(splitTags(f.category));
+    setCertifications(splitTags(f.certification));
+    setDescription(f.description ?? '');
+  };
 
   useEffect(() => {
     getMyFarm()
       .then(({ data }) => {
         setFarm(data.data);
-        setForm({
-          name: data.data.name,
-          region: data.data.region,
-          category: data.data.category,
-          description: data.data.description ?? '',
-        });
+        hydrate(data.data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
+  const toggle = (list: string[], value: string): string[] =>
+    list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+
   const handleSave = async () => {
+    if (!name.trim())     { setError('농가명을 입력해주세요.'); return; }
+    if (!region.trim())   { setError('지역을 입력해주세요.'); return; }
+    if (categories.length === 0) { setError('카테고리를 1개 이상 선택해주세요.'); return; }
+
     setSaving(true);
     setError('');
     try {
-      const { data } = await updateMyFarm(form);
+      const { data } = await updateMyFarm({
+        name: name.trim(),
+        region: region.trim(),
+        category: categories.join(','),
+        certification: certifications.length > 0 ? certifications.join(',') : undefined,
+        description: description.trim() || undefined,
+      });
       setFarm(data.data);
       setEditing(false);
     } catch (err: any) {
@@ -333,6 +359,12 @@ function InfoTab() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    if (farm) hydrate(farm);
+    setError('');
+    setEditing(false);
   };
 
   if (loading) return <div className="flex justify-center py-xl"><LoadingSpinner size="lg" /></div>;
@@ -344,6 +376,9 @@ function InfoTab() {
     REJECTED: { label: '반려됨',   color: 'text-error' },
   };
   const st = STATUS_MAP[farm.status] ?? { label: farm.status, color: 'text-on-surface' };
+
+  const farmCategories = splitTags(farm.category);
+  const farmCertifications = splitTags(farm.certification);
 
   return (
     <div className="bg-white rounded-2xl border border-outline-variant p-lg max-w-2xl">
@@ -359,49 +394,111 @@ function InfoTab() {
 
       {editing ? (
         <div className="flex flex-col gap-md">
-          {[
-            { label: '농가명', key: 'name' as const },
-            { label: '지역',   key: 'region' as const },
-            { label: '카테고리', key: 'category' as const },
-          ].map(({ label, key }) => (
-            <div key={key} className="flex flex-col gap-xs">
-              <label className="font-label-md text-label-md text-on-surface-variant">{label}</label>
-              <input
-                value={form[key]}
-                onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
-                className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-label-md text-on-surface-variant">농가명</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-label-md text-on-surface-variant">지역</label>
+            <input
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-label-md text-on-surface-variant">카테고리 (복수 선택 가능)</label>
+            <div className="flex flex-wrap gap-xs">
+              {FARM_CATEGORIES.map((c) => {
+                const active = categories.includes(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCategories((prev) => toggle(prev, c))}
+                    className={`px-md py-xs rounded-full font-label-md text-label-md border transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-primary text-on-primary border-primary'
+                        : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
             </div>
-          ))}
+          </div>
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-label-md text-on-surface-variant">인증 (복수 선택 가능)</label>
+            <div className="flex flex-wrap gap-xs">
+              {CERTIFICATIONS.map((c) => {
+                const active = certifications.includes(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCertifications((prev) => toggle(prev, c))}
+                    className={`px-md py-xs rounded-full font-label-md text-label-md border transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-tertiary-container text-on-tertiary-container border-tertiary'
+                        : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="flex flex-col gap-xs">
             <label className="font-label-md text-label-md text-on-surface-variant">소개</label>
             <textarea
-              value={form.description}
-              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               rows={4}
               className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
           </div>
           {error && <p className="font-label-sm text-label-sm text-error">{error}</p>}
           <div className="flex gap-sm justify-end">
-            <Button variant="outline" onClick={() => setEditing(false)}>취소</Button>
+            <Button variant="outline" onClick={handleCancel}>취소</Button>
             <Button loading={saving} onClick={handleSave}>저장</Button>
           </div>
         </div>
       ) : (
         <dl className="flex flex-col gap-md">
-          {[
-            { label: '농가명',   value: farm.name },
-            { label: '지역',     value: farm.region },
-            { label: '카테고리', value: farm.category },
-            { label: '인증',     value: farm.certification ?? '-' },
-            { label: '소개',     value: farm.description ?? '-' },
-          ].map(({ label, value }) => (
-            <div key={label} className="grid grid-cols-[100px_1fr] gap-md">
-              <dt className="font-label-md text-label-md text-on-surface-variant">{label}</dt>
-              <dd className="font-body-md text-body-md text-on-surface">{value}</dd>
-            </div>
-          ))}
+          <div className="grid grid-cols-[100px_1fr] gap-md">
+            <dt className="font-label-md text-label-md text-on-surface-variant">농가명</dt>
+            <dd className="font-body-md text-body-md text-on-surface">{farm.name}</dd>
+          </div>
+          <div className="grid grid-cols-[100px_1fr] gap-md">
+            <dt className="font-label-md text-label-md text-on-surface-variant">지역</dt>
+            <dd className="font-body-md text-body-md text-on-surface">{farm.region}</dd>
+          </div>
+          <div className="grid grid-cols-[100px_1fr] gap-md">
+            <dt className="font-label-md text-label-md text-on-surface-variant">카테고리</dt>
+            <dd className="flex flex-wrap gap-xs">
+              {farmCategories.length > 0 ? farmCategories.map((c) => (
+                <span key={c} className="px-sm py-xs rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm">{c}</span>
+              )) : <span className="font-body-md text-body-md text-on-surface-variant">-</span>}
+            </dd>
+          </div>
+          <div className="grid grid-cols-[100px_1fr] gap-md">
+            <dt className="font-label-md text-label-md text-on-surface-variant">인증</dt>
+            <dd className="flex flex-wrap gap-xs">
+              {farmCertifications.length > 0 ? farmCertifications.map((c) => (
+                <span key={c} className="px-sm py-xs rounded-full bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm">{c}</span>
+              )) : <span className="font-body-md text-body-md text-on-surface-variant">-</span>}
+            </dd>
+          </div>
+          <div className="grid grid-cols-[100px_1fr] gap-md">
+            <dt className="font-label-md text-label-md text-on-surface-variant">소개</dt>
+            <dd className="font-body-md text-body-md text-on-surface">{farm.description ?? '-'}</dd>
+          </div>
         </dl>
       )}
     </div>

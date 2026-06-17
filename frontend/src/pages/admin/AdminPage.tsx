@@ -220,9 +220,13 @@ function FarmsTab() {
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface font-semibold">{farm.name}</td>
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface-variant">{farm.region}</td>
                       <td className="px-md py-sm">
-                        <span className="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-sm py-xs rounded-full">
-                          {farm.category}
-                        </span>
+                        <div className="flex flex-wrap gap-xs">
+                          {(farm.category ?? '').split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                            <span key={c} className="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-sm py-xs rounded-full">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{date}</td>
                       <td className={`px-md py-sm font-label-md text-label-md font-semibold ${st.color}`}>{st.label}</td>

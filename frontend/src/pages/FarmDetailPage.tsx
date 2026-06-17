@@ -8,6 +8,9 @@ import Badge from '../components/common/Badge';
 import ProductCard from '../components/product/ProductCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
+const splitTags = (value?: string | null): string[] =>
+  value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [];
+
 /* ── 별점 표시 ────────────────────────────────────────────────────────────── */
 function StarRating({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md' }) {
   const textSize = size === 'sm' ? 'text-[16px]' : 'text-[20px]';
@@ -134,7 +137,9 @@ export default function FarmDetailPage() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-sm mb-sm">
                 <h1 className="font-headline-lg text-headline-lg">{farm.name}</h1>
-                {farm.certification && <Badge label={farm.certification} />}
+                {splitTags(farm.certification).map((c) => (
+                  <Badge key={c} label={c} />
+                ))}
                 {farm.status === 'APPROVED' && (
                   <span className="flex items-center gap-xs font-label-sm text-label-sm text-on-primary/80">
                     <span className="material-symbols-outlined text-[16px]">verified</span>
@@ -143,14 +148,18 @@ export default function FarmDetailPage() {
                 )}
               </div>
 
-              <p className="font-body-lg text-body-lg text-on-primary/80 flex items-center gap-xs mb-md">
+              <div className="font-body-lg text-body-lg text-on-primary/80 flex flex-wrap items-center gap-xs mb-md">
                 <span className="material-symbols-outlined text-[20px]">location_on</span>
-                {farm.region}
+                <span>{farm.region}</span>
                 <span className="mx-xs text-on-primary/40">•</span>
-                <span className="bg-primary-container text-on-primary-container px-sm py-xs rounded-full font-label-sm text-label-sm">
-                  {farm.category}
-                </span>
-              </p>
+                <div className="flex flex-wrap gap-xs">
+                  {splitTags(farm.category).map((c) => (
+                    <span key={c} className="bg-primary-container text-on-primary-container px-sm py-xs rounded-full font-label-sm text-label-sm">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
               {/* 통계 */}
               <div className="flex flex-wrap gap-lg">

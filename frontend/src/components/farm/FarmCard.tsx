@@ -6,7 +6,13 @@ interface FarmCardProps {
   farm: Farm;
 }
 
+const splitTags = (value?: string | null): string[] =>
+  value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [];
+
 export default function FarmCard({ farm }: FarmCardProps) {
+  const certifications = splitTags(farm.certification);
+  const categories = splitTags(farm.category);
+
   return (
     <Link
       to={`/farms/${farm.id}`}
@@ -30,13 +36,15 @@ export default function FarmCard({ farm }: FarmCardProps) {
           {farm.region}
         </p>
 
-        {farm.certification && (
-          <div className="mb-sm">
-            <Badge label={farm.certification} />
+        {certifications.length > 0 && (
+          <div className="mb-sm flex flex-wrap gap-xs">
+            {certifications.map((c) => (
+              <Badge key={c} label={c} />
+            ))}
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-sm">
+        <div className="flex items-center justify-between mt-sm gap-xs">
           {farm.averageRating != null ? (
             <span className="flex items-center gap-xs font-label-md text-label-md text-secondary">
               <span
@@ -53,9 +61,13 @@ export default function FarmCard({ farm }: FarmCardProps) {
           ) : (
             <span className="font-label-md text-label-md text-outline">리뷰 없음</span>
           )}
-          <span className="font-label-sm text-label-sm text-primary bg-primary-fixed px-xs py-[2px] rounded">
-            {farm.category}
-          </span>
+          <div className="flex flex-wrap gap-xs justify-end">
+            {categories.map((c) => (
+              <span key={c} className="font-label-sm text-label-sm text-primary bg-primary-fixed px-xs py-[2px] rounded">
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </Link>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import * as authApi from '../api/auth';
-import { updateMyFarm } from '../api/farm';
 import useAuthStore from '../store/authStore';
 import type { Role } from '../types';
 import Button from '../components/common/Button';
@@ -25,9 +24,12 @@ export default function RegisterPage() {
 
   const [farmName, setFarmName] = useState('');
   const [region, setRegion] = useState('');
-  const [category, setCategory] = useState(FARM_CATEGORIES[0]);
-  const [certification, setCertification] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<string[]>([]);
   const [description, setDescription] = useState('');
+
+  const toggle = (list: string[], value: string): string[] =>
+    list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,23 +46,29 @@ export default function RegisterPage() {
       setError('비밀번호가 일치하지 않아요.');
       return;
     }
+    if (role === 'FARMER') {
+      if (!farmName.trim())     { setError('농장명을 입력해주세요.'); return; }
+      if (!region.trim())       { setError('지역을 입력해주세요.'); return; }
+      if (categories.length === 0) { setError('카테고리를 1개 이상 선택해주세요.'); return; }
+    }
 
     setLoading(true);
     try {
-      const { data } = await authApi.register({ email, password, role });
+      const { data } = await authApi.register({
+        email,
+        password,
+        role,
+        ...(role === 'FARMER' && {
+          farmName: farmName.trim(),
+          region: region.trim(),
+          category: categories.join(','),
+          certification: certifications.length > 0 ? certifications.join(',') : undefined,
+          description: description.trim() || undefined,
+        }),
+      });
       const { accessToken, refreshToken, user } = data.data;
 
       setAuth(user, accessToken, refreshToken);
-
-      if (role === 'FARMER' && farmName) {
-        await updateMyFarm({
-          name: farmName,
-          region,
-          category,
-          certification: certification || undefined,
-          description: description || undefined,
-        });
-      }
 
       navigate(role === 'FARMER' ? '/farm/dashboard' : '/mypage');
     } catch (err: any) {
@@ -138,44 +146,65 @@ export default function RegisterPage() {
             {role === 'FARMER' && (
               <div className="flex flex-col gap-md pt-md border-t border-outline-variant">
                 <p className="font-label-md text-label-md text-primary font-semibold">
-                  🌱 농가 정보 (선택 — 나중에 수정 가능)
+                  🌱 농가 정보 (가입 후 관리자 승인 필요)
                 </p>
                 <Input
                   label="농장명"
                   placeholder="예) 청솔농장"
                   value={farmName}
                   onChange={(e) => setFarmName(e.target.value)}
+                  required
                 />
                 <Input
                   label="지역"
                   placeholder="예) 충남 아산"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
+                  required
                 />
                 <div className="flex flex-col gap-xs">
-                  <label className="font-label-md text-label-md text-on-surface-variant">카테고리</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary py-sm"
-                  >
-                    {FARM_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <label className="font-label-md text-label-md text-on-surface-variant">카테고리 (복수 선택 가능)</label>
+                  <div className="flex flex-wrap gap-xs">
+                    {FARM_CATEGORIES.map((c) => {
+                      const active = categories.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setCategories((prev) => toggle(prev, c))}
+                          className={`px-md py-xs rounded-full font-label-md text-label-md border transition-colors cursor-pointer ${
+                            active
+                              ? 'bg-primary text-on-primary border-primary'
+                              : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex flex-col gap-xs">
-                  <label className="font-label-md text-label-md text-on-surface-variant">인증 (선택)</label>
-                  <select
-                    value={certification}
-                    onChange={(e) => setCertification(e.target.value)}
-                    className="w-full px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary py-sm"
-                  >
-                    <option value="">없음</option>
-                    {CERTIFICATIONS.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <label className="font-label-md text-label-md text-on-surface-variant">인증 (복수 선택 가능)</label>
+                  <div className="flex flex-wrap gap-xs">
+                    {CERTIFICATIONS.map((c) => {
+                      const active = certifications.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setCertifications((prev) => toggle(prev, c))}
+                          className={`px-md py-xs rounded-full font-label-md text-label-md border transition-colors cursor-pointer ${
+                            active
+                              ? 'bg-tertiary-container text-on-tertiary-container border-tertiary'
+                              : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex flex-col gap-xs">
                   <label className="font-label-md text-label-md text-on-surface-variant">농가 소개 (선택)</label>

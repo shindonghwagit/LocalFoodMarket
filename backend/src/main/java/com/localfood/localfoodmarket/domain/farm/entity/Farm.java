@@ -28,10 +28,10 @@ public class Farm extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String region;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 200)
     private String category;
 
-    @Column(length = 100)
+    @Column(length = 200)
     private String certification;
 
     @Enumerated(EnumType.STRING)
