@@ -5,7 +5,6 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// 요청 인터셉터 — JWT 토큰 자동 주입
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) {
@@ -14,11 +13,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 응답 인터셉터 — 401 시 자동 로그아웃
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const config = error.config as { _skipAuthRedirect?: boolean; url?: string } | undefined;
+    const skipRedirect = config?._skipAuthRedirect;
+    const isAuthEndpoint = config?.url?.startsWith('/auth/');
+    if (error.response?.status === 401 && !skipRedirect && !isAuthEndpoint) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       window.location.href = '/login';

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import useAuthStore from './store/authStore';
 import type { Role } from './types';
 
+import AuthHydrator from './components/auth/AuthHydrator';
 import Layout from './components/layout/Layout';
 
 import HomePage from './pages/HomePage';
@@ -42,6 +43,7 @@ function PrivateRoute({ roles }: PrivateRouteProps) {
 export default function App() {
   return (
     <BrowserRouter>
+      <AuthHydrator>
       <Routes>
         <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
 
@@ -69,6 +71,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </AuthHydrator>
     </BrowserRouter>
   );
 }

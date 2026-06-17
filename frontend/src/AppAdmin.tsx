@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import useAuthStore from './store/authStore';
 
+import AuthHydrator from './components/auth/AuthHydrator';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminPage from './pages/admin/AdminPage';
 
@@ -15,15 +16,17 @@ function AdminGuard() {
 export default function AppAdmin() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<AdminLoginPage />} />
+      <AuthHydrator>
+        <Routes>
+          <Route path="/login" element={<AdminLoginPage />} />
 
-        <Route element={<AdminGuard />}>
-          <Route path="/admin/*" element={<AdminPage />} />
-        </Route>
+          <Route element={<AdminGuard />}>
+            <Route path="/admin/*" element={<AdminPage />} />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </AuthHydrator>
     </BrowserRouter>
   );
 }

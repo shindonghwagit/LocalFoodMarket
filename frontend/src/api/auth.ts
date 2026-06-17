@@ -22,5 +22,5 @@ export const login = (data: { email: string; password: string }) =>
 export const completeOAuth2 = (data: { tempToken: string; role: Role }) =>
   api.post<ApiResponse<AuthResponse>>('/auth/oauth2/complete', data);
 
-export const getMe = () =>
-  api.get<ApiResponse<User>>('/users/me');
+export const getMe = (config?: AxiosRequestConfig) =>
+  api.get<ApiResponse<User>>('/users/me', config);
