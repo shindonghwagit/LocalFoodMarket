@@ -40,6 +40,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 정보를 찾을 수 없어요."),
     ORDER_FORBIDDEN(HttpStatus.FORBIDDEN, "본인의 주문만 조회할 수 있어요."),
     ORDER_STATUS_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 주문의 상태를 변경할 권한이 없어요."),
+    INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "현재 주문 상태에서는 처리할 수 없어요."),
 
     // 리뷰
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없어요."),

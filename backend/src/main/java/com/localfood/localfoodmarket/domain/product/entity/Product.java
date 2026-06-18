@@ -42,6 +42,9 @@ public class Product extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Version
+    private Long version;
+
     @Builder
     private Product(Farm farm, String name, Integer price, Integer stock,
                     String category, LocalDate harvestDate, String description) {

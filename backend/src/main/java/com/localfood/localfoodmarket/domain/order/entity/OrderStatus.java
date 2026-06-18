@@ -1,5 +1,13 @@
 package com.localfood.localfoodmarket.domain.order.entity;
 
 public enum OrderStatus {
-    PENDING, PAID, SHIPPING, DONE
+    PAID,
+    READY,
+    PREPARING,
+    SHIPPING,
+    DELIVERED,
+    CONFIRMED,
+    SETTLED,
+    CANCELED,
+    REFUNDED
 }

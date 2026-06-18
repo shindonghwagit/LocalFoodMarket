@@ -4,7 +4,7 @@ import com.localfood.localfoodmarket.domain.point.dto.PointBalanceResponseDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointChargeRequestDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointLogResponseDto;
 import com.localfood.localfoodmarket.domain.point.entity.PointLog;
-import com.localfood.localfoodmarket.domain.point.entity.PointType;
+import com.localfood.localfoodmarket.domain.point.entity.PointLogType;
 import com.localfood.localfoodmarket.domain.point.repository.PointLogRepository;
 import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
@@ -29,7 +29,7 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PointLogResponseDto> getLogs(Long userId, PointType type, Pageable pageable) {
+    public Page<PointLogResponseDto> getLogs(Long userId, PointLogType type, Pageable pageable) {
         User user = findUser(userId);
 
         Page<PointLog> logs = (type == null)
@@ -48,7 +48,7 @@ public class PointService {
         pointLogRepository.save(PointLog.builder()
                 .user(user)
                 .amount(request.getAmount())
-                .type(PointType.CHARGE)
+                .type(PointLogType.CHARGE)
                 .build());
 
         return PointBalanceResponseDto.builder()

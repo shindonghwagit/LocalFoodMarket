@@ -49,8 +49,8 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.ORDER_REQUIRED);
         }
 
-        // 3단계: 배송 완료 상태인지 확인
-        if (order.getStatus() != OrderStatus.DONE) {
+        // 3단계: 수령확인된 주문만 리뷰 가능 (CONFIRMED 또는 SETTLED)
+        if (order.getStatus() != OrderStatus.CONFIRMED && order.getStatus() != OrderStatus.SETTLED) {
             throw new BusinessException(ErrorCode.ORDER_NOT_DONE);
         }
 

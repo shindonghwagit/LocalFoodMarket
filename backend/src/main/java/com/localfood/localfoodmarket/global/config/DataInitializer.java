@@ -8,7 +8,7 @@ import com.localfood.localfoodmarket.domain.order.entity.OrderStatus;
 import com.localfood.localfoodmarket.domain.order.repository.OrderItemRepository;
 import com.localfood.localfoodmarket.domain.order.repository.OrderRepository;
 import com.localfood.localfoodmarket.domain.point.entity.PointLog;
-import com.localfood.localfoodmarket.domain.point.entity.PointType;
+import com.localfood.localfoodmarket.domain.point.entity.PointLogType;
 import com.localfood.localfoodmarket.domain.point.repository.PointLogRepository;
 import com.localfood.localfoodmarket.domain.post.entity.Comment;
 import com.localfood.localfoodmarket.domain.post.entity.Post;
@@ -260,7 +260,7 @@ public class DataInitializer implements ApplicationRunner {
             user.chargePoint(d.points());
             userRepository.save(user);
             pointLogRepository.save(PointLog.builder()
-                    .user(user).amount(d.points()).type(PointType.CHARGE).build());
+                    .user(user).amount(d.points()).type(PointLogType.CHARGE).build());
             consumers.add(user);
         }
         return consumers;
@@ -272,12 +272,12 @@ public class DataInitializer implements ApplicationRunner {
 
         List<OD> data = List.of(
             // DONE 6건 (리뷰 작성 대상)
-            new OD(0,  0, 2, OrderStatus.DONE,     "서울 마포구 합정동 123"),
-            new OD(0,  6, 3, OrderStatus.DONE,     "서울 마포구 합정동 123"),
-            new OD(1,  3, 1, OrderStatus.DONE,     "부산 해운대구 우동 456"),
-            new OD(2, 21, 2, OrderStatus.DONE,     "대구 수성구 범어동 789"),
-            new OD(3,  9, 4, OrderStatus.DONE,     "인천 남동구 구월동 321"),
-            new OD(4, 12, 2, OrderStatus.DONE,     "광주 서구 치평동 654"),
+            new OD(0,  0, 2, OrderStatus.SETTLED,     "서울 마포구 합정동 123"),
+            new OD(0,  6, 3, OrderStatus.SETTLED,     "서울 마포구 합정동 123"),
+            new OD(1,  3, 1, OrderStatus.SETTLED,     "부산 해운대구 우동 456"),
+            new OD(2, 21, 2, OrderStatus.SETTLED,     "대구 수성구 범어동 789"),
+            new OD(3,  9, 4, OrderStatus.SETTLED,     "인천 남동구 구월동 321"),
+            new OD(4, 12, 2, OrderStatus.SETTLED,     "광주 서구 치평동 654"),
             // SHIPPING 4건
             new OD(0, 27, 1, OrderStatus.SHIPPING, "서울 마포구 합정동 123"),
             new OD(1, 15, 2, OrderStatus.SHIPPING, "부산 해운대구 우동 456"),
@@ -290,11 +290,11 @@ public class DataInitializer implements ApplicationRunner {
             new OD(4,  1, 2, OrderStatus.PAID,     "광주 서구 치평동 654"),
             new OD(2, 13, 1, OrderStatus.PAID,     "대구 수성구 범어동 789"),
             // PENDING 5건
-            new OD(0, 19, 1, OrderStatus.PENDING,  "서울 마포구 합정동 123"),
-            new OD(1, 22, 2, OrderStatus.PENDING,  "부산 해운대구 우동 456"),
-            new OD(3, 28, 1, OrderStatus.PENDING,  "인천 남동구 구월동 321"),
-            new OD(4,  5, 1, OrderStatus.PENDING,  "광주 서구 치평동 654"),
-            new OD(2, 10, 2, OrderStatus.PENDING,  "대구 수성구 범어동 789")
+            new OD(0, 19, 1, OrderStatus.PAID,  "서울 마포구 합정동 123"),
+            new OD(1, 22, 2, OrderStatus.PAID,  "부산 해운대구 우동 456"),
+            new OD(3, 28, 1, OrderStatus.PAID,  "인천 남동구 구월동 321"),
+            new OD(4,  5, 1, OrderStatus.PAID,  "광주 서구 치평동 654"),
+            new OD(2, 10, 2, OrderStatus.PAID,  "대구 수성구 범어동 789")
         );
 
         List<Order> doneOrders = new ArrayList<>();
@@ -314,7 +314,7 @@ public class DataInitializer implements ApplicationRunner {
                     .quantity(d.qty()).priceAtOrder(product.getPrice())
                     .build());
 
-            if (d.status() == OrderStatus.DONE) doneOrders.add(order);
+            if (d.status() == OrderStatus.SETTLED) doneOrders.add(order);
         }
         return doneOrders;
     }

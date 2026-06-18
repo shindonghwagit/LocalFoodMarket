@@ -3,7 +3,7 @@ package com.localfood.localfoodmarket.domain.point.controller;
 import com.localfood.localfoodmarket.domain.point.dto.PointBalanceResponseDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointChargeRequestDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointLogResponseDto;
-import com.localfood.localfoodmarket.domain.point.entity.PointType;
+import com.localfood.localfoodmarket.domain.point.entity.PointLogType;
 import com.localfood.localfoodmarket.domain.point.service.PointService;
 import com.localfood.localfoodmarket.global.response.ApiResponse;
 import com.localfood.localfoodmarket.global.response.PageResponse;
@@ -33,7 +33,7 @@ public class PointController {
     @GetMapping("/logs")
     public ApiResponse<PageResponse<PointLogResponseDto>> getLogs(
             @AuthenticationPrincipal Long userId,
-            @RequestParam(required = false) PointType type,
+            @RequestParam(required = false) PointLogType type,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.success(PageResponse.from(pointService.getLogs(userId, type, pageable)));
     }

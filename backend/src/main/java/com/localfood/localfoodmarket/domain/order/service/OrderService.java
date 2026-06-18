@@ -12,7 +12,7 @@ import com.localfood.localfoodmarket.domain.order.entity.OrderStatus;
 import com.localfood.localfoodmarket.domain.order.repository.OrderItemRepository;
 import com.localfood.localfoodmarket.domain.order.repository.OrderRepository;
 import com.localfood.localfoodmarket.domain.point.entity.PointLog;
-import com.localfood.localfoodmarket.domain.point.entity.PointType;
+import com.localfood.localfoodmarket.domain.point.entity.PointLogType;
 import com.localfood.localfoodmarket.domain.point.repository.PointLogRepository;
 import com.localfood.localfoodmarket.domain.product.entity.Product;
 import com.localfood.localfoodmarket.domain.product.repository.ProductRepository;
@@ -83,7 +83,7 @@ public class OrderService {
         pointLogRepository.save(PointLog.builder()
                 .user(user)
                 .amount(totalPrice)
-                .type(PointType.USE)
+                .type(PointLogType.HOLD)
                 .build());
 
         // 6단계: 주문 저장
