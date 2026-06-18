@@ -200,7 +200,7 @@ npm run dev
 
 | 역할 | 이메일 | 비밀번호 |
 |---|---|---|
-| 관리자 | admin@localfood.com | adminpassword12 |
+| 관리자 | admin@localfood.com | sdh48624@ |
 | 농가 | farm1@localfood.com | farmerpass12 |
 | 소비자 | consumer1@localfood.com | consumerpass12 |
 
