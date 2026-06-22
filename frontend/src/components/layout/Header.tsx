@@ -74,7 +74,7 @@ export default function Header() {
                   로그인
                 </Link>
                 <Link
-                  to="/login?mode=register"
+                  to="/register"
                   className="bg-primary text-on-primary font-label-md text-label-md px-md py-xs rounded-full hover:opacity-90 transition-opacity"
                 >
                   회원가입
@@ -134,7 +134,7 @@ export default function Header() {
                       로그인
                     </Link>
                     <Link
-                      to="/login?mode=register"
+                      to="/register"
                       onClick={() => setMenuOpen(false)}
                       className="block py-xs font-body-md text-body-md text-primary font-semibold"
                     >

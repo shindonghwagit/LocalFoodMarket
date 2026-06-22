@@ -41,6 +41,8 @@ public enum ErrorCode {
     ORDER_FORBIDDEN(HttpStatus.FORBIDDEN, "본인의 주문만 조회할 수 있어요."),
     ORDER_STATUS_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 주문의 상태를 변경할 권한이 없어요."),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "현재 주문 상태에서는 처리할 수 없어요."),
+    ORDER_NOT_CANCELABLE(HttpStatus.BAD_REQUEST, "지금은 주문을 취소할 수 없는 상태예요."),
+    ORDER_CONFLICT(HttpStatus.CONFLICT, "주문이 동시에 몰려 처리하지 못했어요. 잠시 후 다시 시도해주세요."),
 
     // 리뷰
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없어요."),

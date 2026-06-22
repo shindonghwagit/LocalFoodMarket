@@ -73,4 +73,9 @@ public class Product extends BaseEntity {
         }
         this.stock -= quantity;
     }
+
+    // 주문 취소 시 재고 복원
+    public void increaseStock(int quantity) {
+        this.stock += quantity;
+    }
 }

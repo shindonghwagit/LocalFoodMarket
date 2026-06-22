@@ -184,10 +184,4 @@ public class Order extends BaseEntity {
         }
         this.status = OrderStatus.REFUNDED;
     }
-
-    // 기존 호환용 — 다음 단계에서 제거 예정
-    @Deprecated
-    public void updateStatus(OrderStatus status) {
-        this.status = status;
-    }
 }

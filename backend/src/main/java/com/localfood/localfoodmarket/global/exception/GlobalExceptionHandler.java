@@ -1,6 +1,7 @@
 package com.localfood.localfoodmarket.global.exception;
 
 import com.localfood.localfoodmarket.global.response.ApiResponse;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -44,6 +45,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException e) {
         ErrorCode code = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity
+                .status(code.getStatus())
+                .body(ApiResponse.error(code.name(), code.getMessage()));
+    }
+
+    // 낙관적 락 충돌 — 서비스 재시도까지 실패하고 흘러나온 경우의 안전망
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLock(OptimisticLockingFailureException e) {
+        ErrorCode code = ErrorCode.ORDER_CONFLICT;
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.error(code.name(), code.getMessage()));

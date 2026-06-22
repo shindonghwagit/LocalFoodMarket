@@ -44,11 +44,30 @@ public class OrderController {
         return ApiResponse.success(orderService.getOrder(userId, orderId));
     }
 
+    // 농가: 주문 상태 진행 (READY / PREPARING / SHIPPING / DELIVERED)
     @PatchMapping("/{orderId}/status")
     public ApiResponse<OrderResponseDto> updateStatus(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long orderId,
             @RequestBody @Valid OrderStatusUpdateRequestDto request) {
         return ApiResponse.success(orderService.updateOrderStatus(userId, orderId, request), "주문 상태가 변경됐어요.");
+    }
+
+    // 구매자: 수령 확인 → 정산
+    @PatchMapping("/{orderId}/confirm")
+    public ApiResponse<OrderResponseDto> confirm(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long orderId) {
+        return ApiResponse.success(orderService.confirmOrder(userId, orderId),
+                "수령이 확인됐어요. 거래가 완료됐습니다.");
+    }
+
+    // 구매자 또는 농가: 주문 취소 → 환불
+    @PatchMapping("/{orderId}/cancel")
+    public ApiResponse<OrderResponseDto> cancel(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long orderId) {
+        return ApiResponse.success(orderService.cancelOrder(userId, orderId),
+                "주문이 취소됐어요. 포인트가 환불됐습니다.");
     }
 }
