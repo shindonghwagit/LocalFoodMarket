@@ -290,21 +290,43 @@ public class OrderService {
         Order order = orderRepository.findByIdAndUser(orderId, user)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
+        Escrow escrow = settle(order);
+
+        return OrderResponseDto.of(order, orderItemRepository.findByOrder(order), escrow.getStatus());
+    }
+
+    /**
+     * 자동확정 스케줄러용 — 한 건씩 새 트랜잭션으로 정산한다(스케줄러가 프록시를 통해 호출).
+     * 조회 시점과 처리 시점 사이에 구매자가 직접 수령확인했을 수 있으므로
+     * 최신 상태를 다시 읽어 DELIVERED가 아니면 건너뛴다(동시성 보호).
+     */
+    @Transactional
+    public void autoConfirm(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (order.getStatus() != OrderStatus.DELIVERED) {
+            return;
+        }
+        settle(order);
+    }
+
+    /**
+     * 수령확인 → 정산 공통 로직 (수동 confirm / 자동확정 공유).
+     * READY(픽업)·DELIVERED(배송) → CONFIRMED → SETTLED,
+     * 에스크로 RELEASE, 농가 포인트 지급(point_logs: RELEASE).
+     */
+    private Escrow settle(Order order) {
         Escrow escrow = escrowRepository.findByOrder(order)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND,
                         "에스크로 정보를 찾을 수 없어요."));
 
-        // 1) READY(픽업)/DELIVERED(배송)에서만 수령확인 가능 → CONFIRMED
-        order.confirm();
-        // 2) 에스크로 잠금 해제 HELD → RELEASED
-        escrow.release();
-        // 3·4) 농가 포인트 지급 + point_logs(RELEASE, balanceAfter)
-        User farmOwner = order.getFarm().getUser();
-        pointService.release(farmOwner, order, escrow.getAmount());
-        // 정산 완료 CONFIRMED → SETTLED
-        order.settle();
+        order.confirm();                                                  // → CONFIRMED
+        escrow.release();                                                 // HELD → RELEASED
+        pointService.release(order.getFarm().getUser(), order, escrow.getAmount()); // 농가 지급 + RELEASE 로그
+        order.settle();                                                   // CONFIRMED → SETTLED
 
-        return OrderResponseDto.of(order, orderItemRepository.findByOrder(order), escrow.getStatus());
+        return escrow;
     }
 
     // ===== 취소 → 환불 (CANCELED, 에스크로 REFUND, 재고·포인트 복원) =====

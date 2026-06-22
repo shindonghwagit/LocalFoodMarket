@@ -52,6 +52,10 @@ file:
   upload-dir: uploads/
   max-size: 10485760
 
+order:
+  # 배송완료(DELIVERED) 후 자동 수령확인까지의 기간(일). 테스트 시 줄여서 검증 가능.
+  auto-confirm-days: 7
+
 kakao:
   address:
     api-key: ${KAKAO_ADDRESS_API_KEY}
