@@ -60,3 +60,8 @@ kakao:
   address:
     api-key: ${KAKAO_ADDRESS_API_KEY}
     url: https://dapi.kakao.com/v2/local/search/address.json
+
+toss:
+  client-key: ${TOSS_CLIENT_KEY:test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm}
+  secret-key: ${TOSS_SECRET_KEY:test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6}
+  confirm-url: https://api.tosspayments.com/v1/payments/confirm

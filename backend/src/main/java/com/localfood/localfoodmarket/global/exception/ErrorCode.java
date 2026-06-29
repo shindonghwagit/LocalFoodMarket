@@ -44,6 +44,12 @@ public enum ErrorCode {
     ORDER_NOT_CANCELABLE(HttpStatus.BAD_REQUEST, "지금은 주문을 취소할 수 없는 상태예요."),
     ORDER_CONFLICT(HttpStatus.CONFLICT, "주문이 동시에 몰려 처리하지 못했어요. 잠시 후 다시 시도해주세요."),
 
+    // 결제(충전)
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없어요."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않아요. 다시 시도해주세요."),
+    PAYMENT_ALREADY_DONE(HttpStatus.CONFLICT, "이미 처리된 결제예요."),
+    PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_REQUEST, "결제 승인에 실패했어요. 잠시 후 다시 시도해주세요."),
+
     // 리뷰
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없어요."),
     REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "본인의 리뷰만 삭제할 수 있어요."),

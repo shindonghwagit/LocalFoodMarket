@@ -61,6 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/address/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/files/**").hasAnyRole("CONSUMER", "FARMER")
+                        // 포인트 충전(토스 결제)은 소비자만
+                        .requestMatchers("/payments/**").hasRole("CONSUMER")
                         // 관리자 엔드포인트는 ADMIN 권한 필수
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // 나머지는 인증 필요
