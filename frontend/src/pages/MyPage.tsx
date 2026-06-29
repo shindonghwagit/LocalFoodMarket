@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import type { Order, Post, PointLog } from '../types';
-import { getOrders } from '../api/order';
+import type { Order, PointLog, PointLogType, Post } from '../types';
+import { getOrders, confirmOrder, cancelOrder } from '../api/order';
 import { getPosts } from '../api/post';
 import { chargePoint, getPointLogs } from '../api/point';
 import { getMe } from '../api/auth';
 import useAuthStore from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING:  { label: '결제대기', color: 'text-outline' },
-  PAID:     { label: '결제완료', color: 'text-primary' },
-  SHIPPING: { label: '배송중',   color: 'text-tertiary' },
-  DONE:     { label: '배송완료', color: 'text-on-surface-variant' },
-};
+import OrderStatusBadge from '../components/order/OrderStatusBadge';
 
 const CHARGE_AMOUNTS = [10000, 30000, 50000, 100000];
 
+// 포인트 로그 유형별 표시 (부호 + 라벨 + 색상)
+const POINT_LOG_META: Record<PointLogType, { label: string; sign: '+' | '-'; positive: boolean }> = {
+  CHARGE:  { label: '충전',      sign: '+', positive: true },
+  HOLD:    { label: '주문 결제', sign: '-', positive: false },
+  RELEASE: { label: '판매 정산', sign: '+', positive: true },
+  REFUND:  { label: '주문 환불', sign: '+', positive: true },
+};
+
 /* ── 주문 내역 탭 ─────────────────────────────────────────────────────────── */
 function OrdersTab() {
+  const { setUser } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actingId, setActingId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
     getOrders()
@@ -28,6 +33,38 @@ function OrdersTab() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const refreshPoint = () => {
+    getMe().then(({ data }) => setUser(data.data)).catch(() => {});
+  };
+
+  const handleConfirm = async (orderId: number) => {
+    setActingId(orderId);
+    setActionError('');
+    try {
+      const { data } = await confirmOrder(orderId);
+      setOrders((prev) => prev.map((o) => (o.orderId === orderId ? data.data : o)));
+    } catch (err: any) {
+      setActionError(err?.response?.data?.error?.message ?? '수령 확인에 실패했어요.');
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const handleCancel = async (orderId: number) => {
+    if (!window.confirm('주문을 취소하고 포인트를 환불받으시겠어요?')) return;
+    setActingId(orderId);
+    setActionError('');
+    try {
+      const { data } = await cancelOrder(orderId);
+      setOrders((prev) => prev.map((o) => (o.orderId === orderId ? data.data : o)));
+      refreshPoint(); // 환불 포인트 반영
+    } catch (err: any) {
+      setActionError(err?.response?.data?.error?.message ?? '주문 취소에 실패했어요.');
+    } finally {
+      setActingId(null);
+    }
+  };
 
   if (loading) return <div className="flex justify-center py-lg"><LoadingSpinner /></div>;
 
@@ -41,15 +78,21 @@ function OrdersTab() {
 
   return (
     <div className="flex flex-col gap-md">
+      {actionError && (
+        <p className="font-body-md text-body-md text-error bg-error-container px-md py-sm rounded-lg">{actionError}</p>
+      )}
       {orders.map((order) => {
-        const st = STATUS_LABELS[order.status] ?? { label: order.status, color: 'text-on-surface' };
         const date = new Date(order.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
+        const acting = actingId === order.orderId;
+        const canConfirm = order.status === 'DELIVERED' || order.status === 'READY';
+        const canCancel = order.status === 'PAID';
+        const canReview = order.status === 'SETTLED' || order.status === 'CONFIRMED';
         return (
-          <div key={order.id} className="bg-white rounded-xl border border-outline-variant p-md">
+          <div key={order.orderId} className="bg-white rounded-xl border border-outline-variant p-md">
             <div className="flex items-center justify-between mb-md">
-              <div>
-                <span className="font-label-sm text-label-sm text-outline">{date} · 주문 #{order.id}</span>
-                <span className={`ml-md font-label-md text-label-md font-semibold ${st.color}`}>{st.label}</span>
+              <div className="flex items-center gap-md flex-wrap">
+                <span className="font-label-sm text-label-sm text-outline">{date} · 주문 #{order.orderId}</span>
+                <OrderStatusBadge status={order.status} />
               </div>
               <span className="font-headline-sm text-headline-sm text-on-surface">
                 {order.totalPrice.toLocaleString()}P
@@ -70,18 +113,71 @@ function OrdersTab() {
               ))}
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-on-surface-variant">{order.deliveryAddress}</span>
-              {order.status === 'DONE' && (
-                <Link
-                  to="/community/write"
-                  className="flex items-center gap-xs bg-primary-fixed text-primary px-md py-xs rounded-full font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[16px]">rate_review</span>
-                  리뷰 작성
-                </Link>
+            {/* 배송/픽업 정보 */}
+            <div className="flex flex-col gap-xs mb-md font-label-sm text-label-sm text-on-surface-variant">
+              {order.deliveryMethod === 'PICKUP' ? (
+                <>
+                  <p className="flex items-center gap-xs">
+                    <span className="material-symbols-outlined text-[16px]">storefront</span>
+                    픽업 · {order.pickupLocation ?? '-'}
+                  </p>
+                  {order.pickupTime && (
+                    <p className="flex items-center gap-xs">
+                      <span className="material-symbols-outlined text-[16px]">schedule</span>
+                      수령 희망: {new Date(order.pickupTime).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="flex items-center gap-xs">
+                    <span className="material-symbols-outlined text-[16px]">local_shipping</span>
+                    배송 · {order.deliveryAddress ?? '-'}
+                  </p>
+                  {(order.status === 'SHIPPING' || order.status === 'DELIVERED') && order.trackingNumber && (
+                    <p className="flex items-center gap-xs">
+                      <span className="material-symbols-outlined text-[16px]">inventory_2</span>
+                      {order.courier ?? '택배'} · 송장 {order.trackingNumber}
+                    </p>
+                  )}
+                </>
               )}
             </div>
+
+            {/* 액션 */}
+            {(canConfirm || canCancel || canReview) && (
+              <div className="flex items-center justify-end gap-sm">
+                {canCancel && (
+                  <button
+                    onClick={() => handleCancel(order.orderId)}
+                    disabled={acting}
+                    className="flex items-center gap-xs border border-outline-variant text-on-surface-variant px-md py-xs rounded-full font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">cancel</span>
+                    주문 취소
+                  </button>
+                )}
+                {canConfirm && (
+                  <button
+                    onClick={() => handleConfirm(order.orderId)}
+                    disabled={acting}
+                    className="flex items-center gap-xs bg-primary text-on-primary px-md py-xs rounded-full font-label-md text-label-md hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    수령 확인
+                  </button>
+                )}
+                {canReview && (
+                  <Link
+                    to="/community/write"
+                    className="flex items-center gap-xs bg-primary-fixed text-primary px-md py-xs rounded-full font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">rate_review</span>
+                    리뷰 작성
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         );
       })}
@@ -158,21 +254,22 @@ function PointTab() {
           <div className="flex justify-center py-md"><LoadingSpinner /></div>
         ) : logs.length > 0 ? (
           <div className="flex flex-col gap-xs">
-            {logs.map((log) => (
-              <div key={log.id} className="flex items-center justify-between bg-white rounded-xl border border-outline-variant px-md py-sm">
-                <div className="flex items-center gap-sm">
-                  <span className={`material-symbols-outlined text-[20px] ${log.type === 'CHARGE' ? 'text-primary' : 'text-error'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                    {log.type === 'CHARGE' ? 'add_circle' : 'remove_circle'}
-                  </span>
-                  <span className="font-body-md text-body-md text-on-surface">
-                    {log.type === 'CHARGE' ? '충전' : '사용'}
+            {logs.map((log) => {
+              const meta = POINT_LOG_META[log.type] ?? { label: log.type, sign: '', positive: true };
+              return (
+                <div key={log.id} className="flex items-center justify-between bg-white rounded-xl border border-outline-variant px-md py-sm">
+                  <div className="flex items-center gap-sm">
+                    <span className={`material-symbols-outlined text-[20px] ${meta.positive ? 'text-primary' : 'text-error'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+                      {meta.positive ? 'add_circle' : 'remove_circle'}
+                    </span>
+                    <span className="font-body-md text-body-md text-on-surface">{meta.label}</span>
+                  </div>
+                  <span className={`font-headline-sm text-headline-sm ${meta.positive ? 'text-primary' : 'text-error'}`}>
+                    {meta.sign}{log.amount.toLocaleString()}P
                   </span>
                 </div>
-                <span className={`font-headline-sm text-headline-sm ${log.type === 'CHARGE' ? 'text-primary' : 'text-error'}`}>
-                  {log.type === 'CHARGE' ? '+' : '-'}{log.amount.toLocaleString()}P
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="font-body-md text-body-md text-on-surface-variant text-center py-md">포인트 내역이 없어요</p>

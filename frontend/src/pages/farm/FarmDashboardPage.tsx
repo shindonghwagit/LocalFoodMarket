@@ -8,6 +8,7 @@ import { useFarmSSE } from '../../hooks/useFarmSSE';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import OrderStatusBadge from '../../components/order/OrderStatusBadge';
 
 /* ── 사이드바 ──────────────────────────────────────────────────────────────── */
 type Tab = 'dashboard' | 'orders' | 'info' | 'stats';
@@ -54,18 +55,20 @@ function Sidebar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
   );
 }
 
-/* ── 주문 상태 라벨 ─────────────────────────────────────────────────────────── */
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING:  { label: '결제대기', color: 'text-outline' },
-  PAID:     { label: '결제완료', color: 'text-primary' },
-  SHIPPING: { label: '배송중',   color: 'text-tertiary' },
-  DONE:     { label: '배송완료', color: 'text-on-surface-variant' },
-};
-
-const NEXT_STATUS: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
-  PAID:     { next: 'SHIPPING', label: '배송 시작' },
-  SHIPPING: { next: 'DONE',     label: '배송 완료' },
-};
+/* ── 주문 상태 전이 (배송 방식별 농가 다음 액션) ───────────────────────────── */
+function farmerNextAction(order: Order): { next: OrderStatus; label: string } | null {
+  if (order.deliveryMethod === 'PICKUP') {
+    // 픽업: PAID → READY
+    return order.status === 'PAID' ? { next: 'READY', label: '수령 준비 완료' } : null;
+  }
+  // 배송: PAID → PREPARING → SHIPPING → DELIVERED
+  switch (order.status) {
+    case 'PAID':      return { next: 'PREPARING', label: '상품 준비 시작' };
+    case 'PREPARING': return { next: 'SHIPPING',  label: '배송 시작' };
+    case 'SHIPPING':  return { next: 'DELIVERED', label: '배송 완료' };
+    default:          return null;
+  }
+}
 
 /* ── 대시보드 탭 ────────────────────────────────────────────────────────────── */
 function DashboardTab({
@@ -131,12 +134,11 @@ function DashboardTab({
               </thead>
               <tbody className="divide-y divide-outline-variant">
                 {orders.slice(0, 20).map((order) => {
-                  const st = STATUS_LABELS[order.status] ?? { label: order.status, color: 'text-on-surface' };
-                  const nextAction = NEXT_STATUS[order.status as OrderStatus];
+                  const nextAction = farmerNextAction(order);
                   const time = new Date(order.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                   const item = order.items[0];
                   return (
-                    <tr key={order.id} className="hover:bg-surface-container-low transition-colors">
+                    <tr key={order.orderId} className="hover:bg-surface-container-low transition-colors">
                       <td className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{time}</td>
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface">
                         {item?.productName}
@@ -146,13 +148,13 @@ function DashboardTab({
                       </td>
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface">{item?.quantity}개</td>
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface whitespace-nowrap">{order.totalPrice.toLocaleString()}P</td>
-                      <td className={`px-md py-sm font-label-md text-label-md font-semibold ${st.color}`}>{st.label}</td>
+                      <td className="px-md py-sm"><OrderStatusBadge status={order.status} /></td>
                       <td className="px-md py-sm">
                         {nextAction ? (
                           <Button
                             size="sm"
-                            variant={nextAction.next === 'DONE' ? 'outline' : 'primary'}
-                            onClick={() => onStatusChange(order.id, nextAction.next)}
+                            variant={nextAction.next === 'DELIVERED' ? 'outline' : 'primary'}
+                            onClick={() => onStatusChange(order.orderId, nextAction.next)}
                           >
                             {nextAction.label}
                           </Button>

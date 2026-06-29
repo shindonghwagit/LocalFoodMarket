@@ -67,7 +67,20 @@ export interface Product {
 
 // ── 주문 ──────────────────────────────────────────────────────────────────────
 
-export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPING' | 'DONE';
+export type DeliveryMethod = 'PICKUP' | 'DELIVERY';
+
+export type OrderStatus =
+  | 'PAID'        // 결제완료 (포인트 hold)
+  | 'READY'       // 픽업 수령 준비 완료
+  | 'PREPARING'   // 배송 준비중
+  | 'SHIPPING'    // 배송중
+  | 'DELIVERED'   // 배송완료
+  | 'CONFIRMED'   // 구매자 수령확인
+  | 'SETTLED'     // 거래완료 (농가 정산)
+  | 'CANCELED'    // 주문취소
+  | 'REFUNDED';   // 환불완료
+
+export type EscrowStatus = 'HELD' | 'RELEASED' | 'REFUNDED';
 
 export interface OrderItem {
   productId: number;
@@ -77,10 +90,24 @@ export interface OrderItem {
 }
 
 export interface Order {
-  id: number;
+  orderId: number;
+  userId?: number;
+  farmId?: number;
   totalPrice: number;
   status: OrderStatus;
-  deliveryAddress: string;
+  deliveryMethod: DeliveryMethod;
+  // 배송
+  deliveryAddress: string | null;
+  courier: string | null;
+  trackingNumber: string | null;
+  // 픽업
+  pickupLocation: string | null;
+  pickupTime: string | null;
+  buyerNote: string | null;
+  // 에스크로
+  escrowStatus: EscrowStatus | null;
+  // 주문 직후 응답에만 포함
+  remainingPoint?: number | null;
   items: OrderItem[];
   createdAt: string;
 }
@@ -129,7 +156,7 @@ export interface Comment {
 
 // ── 포인트 ────────────────────────────────────────────────────────────────────
 
-export type PointLogType = 'CHARGE' | 'USE';
+export type PointLogType = 'CHARGE' | 'HOLD' | 'RELEASE' | 'REFUND';
 
 export interface PointLog {
   id: number;

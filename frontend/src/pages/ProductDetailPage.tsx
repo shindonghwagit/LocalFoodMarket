@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import type { Product } from '../types';
+import type { DeliveryMethod, Farm, Product } from '../types';
 import { getProduct } from '../api/product';
 import { createOrder } from '../api/order';
+import { getFarm } from '../api/farm';
 import { searchAddress } from '../api/address';
 import type { AddressResult } from '../api/address';
 import { useStockSSE } from '../hooks/useStockSSE';
 import useAuthStore from '../store/authStore';
-import { getMe } from '../api/auth';
 import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -98,8 +98,12 @@ export default function ProductDetailPage() {
   const [error, setError] = useState('');
 
   const [quantity, setQuantity] = useState(1);
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('DELIVERY');
   const [address, setAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
+  const [buyerNote, setBuyerNote] = useState('');
+  const [farm, setFarm] = useState<Farm | null>(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [ordering, setOrdering] = useState(false);
   const [orderError, setOrderError] = useState('');
@@ -107,7 +111,13 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     getProduct(productId)
-      .then(({ data }) => setProduct(data.data))
+      .then(({ data }) => {
+        setProduct(data.data);
+        // 픽업 수령 장소(농가 주소) 표시용
+        getFarm(data.data.farmId)
+          .then(({ data: f }) => setFarm(f.data))
+          .catch(() => {});
+      })
       .catch(() => setError('상품 정보를 불러오는 데 실패했어요.'))
       .finally(() => setLoading(false));
   }, [productId]);
@@ -120,19 +130,33 @@ export default function ProductDetailPage() {
   const totalPrice = (product?.price ?? 0) * quantity;
   const hasEnoughPoints = (user?.pointBalance ?? 0) >= totalPrice;
   const fullAddress = detailAddress ? `${address} ${detailAddress}` : address;
+  // 픽업 수령 장소 = 농가 주소(지역). 농가 정보를 못 불러오면 농가명으로 대체.
+  const pickupLocation = farm ? `${farm.name} (${farm.region})` : product?.farmName ?? '';
 
   const handleOrder = async () => {
     if (!isLoggedIn) { navigate('/login', { state: { from: location.pathname } }); return; }
-    if (!address) { setOrderError('배송지를 입력해주세요.'); return; }
     if (quantity > stock) { setOrderError('재고가 부족해요.'); return; }
     if (!hasEnoughPoints) { setOrderError('포인트가 부족해요.'); return; }
+
+    if (deliveryMethod === 'DELIVERY' && !address) {
+      setOrderError('배송지를 입력해주세요.');
+      return;
+    }
+    if (deliveryMethod === 'PICKUP' && !pickupTime) {
+      setOrderError('수령 희망 시간을 선택해주세요.');
+      return;
+    }
 
     setOrdering(true);
     setOrderError('');
     try {
       const { data } = await createOrder({
-        deliveryAddress: fullAddress,
+        deliveryMethod,
         items: [{ productId, quantity }],
+        buyerNote: buyerNote.trim() || null,
+        ...(deliveryMethod === 'DELIVERY'
+          ? { deliveryAddress: fullAddress }
+          : { pickupLocation, pickupTime }),
       });
       const remaining = data.data.remainingPoint;
       if (user && typeof remaining === 'number') {
@@ -268,32 +292,94 @@ export default function ProductDetailPage() {
               </span>
             </div>
 
-            {/* 배송지 */}
+            {/* 수령 방법 선택 */}
             <div className="flex flex-col gap-xs">
-              <span className="font-label-md text-label-md text-on-surface-variant">배송지</span>
-              <div className="flex gap-sm">
-                <input
-                  readOnly
-                  value={address}
-                  placeholder="주소를 검색해주세요"
-                  className="flex-1 px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md bg-surface-container-low cursor-pointer"
-                  onClick={() => setShowAddressModal(true)}
-                />
-                <button
-                  onClick={() => setShowAddressModal(true)}
-                  className="px-md py-sm bg-surface-container border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
-                >
-                  검색
-                </button>
+              <span className="font-label-md text-label-md text-on-surface-variant">수령 방법</span>
+              <div className="grid grid-cols-2 gap-sm">
+                {([
+                  { value: 'DELIVERY', label: '택배 배송', icon: 'local_shipping' },
+                  { value: 'PICKUP', label: '직접 픽업', icon: 'storefront' },
+                ] as { value: DeliveryMethod; label: string; icon: string }[]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => { setDeliveryMethod(opt.value); setOrderError(''); }}
+                    className={`flex items-center justify-center gap-xs px-md py-sm rounded-lg border font-body-md text-body-md transition-colors cursor-pointer ${
+                      deliveryMethod === opt.value
+                        ? 'border-primary bg-primary-fixed text-primary font-semibold'
+                        : 'border-outline-variant text-on-surface-variant hover:bg-surface-container'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">{opt.icon}</span>
+                    {opt.label}
+                  </button>
+                ))}
               </div>
-              {address && (
-                <input
-                  value={detailAddress}
-                  onChange={(e) => setDetailAddress(e.target.value)}
-                  placeholder="상세 주소 (동/호수 등)"
-                  className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              )}
+            </div>
+
+            {/* 배송 선택 시: 배송지 */}
+            {deliveryMethod === 'DELIVERY' && (
+              <div className="flex flex-col gap-xs">
+                <span className="font-label-md text-label-md text-on-surface-variant">배송지</span>
+                <div className="flex gap-sm">
+                  <input
+                    readOnly
+                    value={address}
+                    placeholder="주소를 검색해주세요"
+                    className="flex-1 px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md bg-surface-container-low cursor-pointer"
+                    onClick={() => setShowAddressModal(true)}
+                  />
+                  <button
+                    onClick={() => setShowAddressModal(true)}
+                    className="px-md py-sm bg-surface-container border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+                  >
+                    검색
+                  </button>
+                </div>
+                {address && (
+                  <input
+                    value={detailAddress}
+                    onChange={(e) => setDetailAddress(e.target.value)}
+                    placeholder="상세 주소 (동/호수 등)"
+                    className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* 픽업 선택 시: 수령 장소 + 수령 희망 시간 */}
+            {deliveryMethod === 'PICKUP' && (
+              <div className="flex flex-col gap-sm">
+                <div className="flex flex-col gap-xs">
+                  <span className="font-label-md text-label-md text-on-surface-variant">수령 장소</span>
+                  <div className="flex items-center gap-xs px-md py-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface">
+                    <span className="material-symbols-outlined text-[18px] text-on-surface-variant">storefront</span>
+                    {pickupLocation || '농가 정보를 불러오는 중...'}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-xs">
+                  <span className="font-label-md text-label-md text-on-surface-variant">수령 희망 시간</span>
+                  <input
+                    type="datetime-local"
+                    value={pickupTime}
+                    onChange={(e) => setPickupTime(e.target.value)}
+                    className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 요청사항 */}
+            <div className="flex flex-col gap-xs">
+              <span className="font-label-md text-label-md text-on-surface-variant">요청사항 (선택)</span>
+              <textarea
+                value={buyerNote}
+                onChange={(e) => setBuyerNote(e.target.value)}
+                rows={2}
+                maxLength={500}
+                placeholder={deliveryMethod === 'PICKUP' ? '예: 도착 10분 전 연락드릴게요' : '예: 부재 시 경비실에 맡겨주세요'}
+                className="px-md py-sm border border-outline-variant rounded-lg font-body-md text-body-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
 
             {/* 포인트 */}
