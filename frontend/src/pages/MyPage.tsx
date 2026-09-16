@@ -22,7 +22,7 @@ const POINT_LOG_META: Record<PointLogType, { label: string; sign: '+' | '-'; pos
 
 /* ── 주문 내역 탭 ─────────────────────────────────────────────────────────── */
 function OrdersTab() {
-  const { setUser } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<number | null>(null);
@@ -45,6 +45,7 @@ function OrdersTab() {
     try {
       const { data } = await confirmOrder(orderId);
       setOrders((prev) => prev.map((o) => (o.orderId === orderId ? data.data : o)));
+      refreshPoint();
     } catch (err: any) {
       setActionError(err?.response?.data?.error?.message ?? '수령 확인에 실패했어요.');
     } finally {
@@ -59,6 +60,9 @@ function OrdersTab() {
     try {
       const { data } = await cancelOrder(orderId);
       setOrders((prev) => prev.map((o) => (o.orderId === orderId ? data.data : o)));
+      if (user && typeof data.data.remainingPoint === 'number') {
+        setUser({ ...user, pointBalance: data.data.remainingPoint });
+      }
       refreshPoint(); // 환불 포인트 반영
     } catch (err: any) {
       setActionError(err?.response?.data?.error?.message ?? '주문 취소에 실패했어요.');
@@ -88,6 +92,9 @@ function OrdersTab() {
         const canConfirm = order.status === 'DELIVERED' || order.status === 'READY';
         const canCancel = order.status === 'PAID';
         const canReview = order.status === 'SETTLED' || order.status === 'CONFIRMED';
+        const reviewCompleted = order.items.length > 0 && order.items.every(
+          (item) => order.reviewedProductIds?.includes(item.productId),
+        );
         return (
           <div key={order.orderId} className="bg-white rounded-xl border border-outline-variant p-md">
             <div className="flex items-center justify-between mb-md">
@@ -168,7 +175,12 @@ function OrdersTab() {
                     수령 확인
                   </button>
                 )}
-                {canReview && (
+                {canReview && (reviewCompleted ? (
+                  <span className="flex items-center gap-xs bg-surface-container text-on-surface-variant px-md py-xs rounded-full font-label-md text-label-md">
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    리뷰 작성 완료
+                  </span>
+                ) : (
                   <Link
                     to="/community/write"
                     className="flex items-center gap-xs bg-primary-fixed text-primary px-md py-xs rounded-full font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors"
@@ -176,7 +188,7 @@ function OrdersTab() {
                     <span className="material-symbols-outlined text-[16px]">rate_review</span>
                     리뷰 작성
                   </Link>
-                )}
+                ))}
               </div>
             )}
           </div>

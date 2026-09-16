@@ -38,6 +38,7 @@ public class OrderResponseDto {
     private final EscrowStatus escrowStatus;
 
     private final Long remainingPoint;   // 주문 직후 응답에만 포함, 이후 null
+    private final List<Long> reviewedProductIds;
     private final List<OrderItemResponseDto> items;
     private final LocalDateTime createdAt;
 
@@ -73,5 +74,25 @@ public class OrderResponseDto {
 
     public static OrderResponseDto of(Order order, List<OrderItem> items) {
         return of(order, items, null, null);
+    }
+
+    public static OrderResponseDto of(Order order, List<OrderItem> items, List<Long> reviewedProductIds) {
+        return OrderResponseDto.builder()
+                .orderId(order.getId())
+                .userId(order.getUser().getId())
+                .farmId(order.getFarm() != null ? order.getFarm().getId() : null)
+                .totalPrice(order.getTotalPrice())
+                .status(order.getStatus())
+                .deliveryMethod(order.getDeliveryMethod())
+                .deliveryAddress(order.getDeliveryAddress())
+                .courier(order.getCourier())
+                .trackingNumber(order.getTrackingNumber())
+                .pickupLocation(order.getPickupLocation())
+                .pickupTime(order.getPickupTime())
+                .buyerNote(order.getBuyerNote())
+                .reviewedProductIds(reviewedProductIds)
+                .items(items.stream().map(OrderItemResponseDto::from).toList())
+                .createdAt(order.getCreatedAt())
+                .build();
     }
 }

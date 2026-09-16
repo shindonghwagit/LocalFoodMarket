@@ -10,9 +10,11 @@ import com.localfood.localfoodmarket.domain.post.entity.Post;
 import com.localfood.localfoodmarket.domain.post.entity.PostImage;
 import com.localfood.localfoodmarket.domain.post.entity.PostLike;
 import com.localfood.localfoodmarket.domain.post.entity.PostProduct;
+import com.localfood.localfoodmarket.domain.post.entity.PostView;
 import com.localfood.localfoodmarket.domain.post.repository.CommentRepository;
 import com.localfood.localfoodmarket.domain.post.repository.PostLikeRepository;
 import com.localfood.localfoodmarket.domain.post.repository.PostRepository;
+import com.localfood.localfoodmarket.domain.post.repository.PostViewRepository;
 import com.localfood.localfoodmarket.domain.product.entity.Product;
 import com.localfood.localfoodmarket.domain.product.repository.ProductRepository;
 import com.localfood.localfoodmarket.domain.user.entity.Role;
@@ -35,6 +37,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostViewRepository postViewRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final ProductRepository productRepository;
@@ -92,12 +95,14 @@ public class PostService {
     @Transactional
     public PostResponseDto getPost(Long postId, Long currentUserId) {
         Post post = findPost(postId);
-        post.incrementViewCount();
         boolean liked = false;
         if (currentUserId != null) {
-            liked = userRepository.findById(currentUserId)
-                    .map(u -> postLikeRepository.existsByUserAndPost(u, post))
-                    .orElse(false);
+            User user = findUser(currentUserId);
+            if (!postViewRepository.existsByPostAndUser(post, user)) {
+                postViewRepository.save(PostView.builder().post(post).user(user).build());
+                post.incrementViewCount();
+            }
+            liked = postLikeRepository.existsByUserAndPost(user, post);
         }
         return PostResponseDto.from(post, liked);
     }

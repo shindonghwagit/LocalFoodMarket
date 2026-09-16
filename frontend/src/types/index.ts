@@ -108,6 +108,7 @@ export interface Order {
   escrowStatus: EscrowStatus | null;
   // 주문 직후 응답에만 포함
   remainingPoint?: number | null;
+  reviewedProductIds?: number[];
   items: OrderItem[];
   createdAt: string;
 }

@@ -17,6 +17,8 @@ import com.localfood.localfoodmarket.domain.order.repository.OrderRepository;
 import com.localfood.localfoodmarket.domain.point.service.PointService;
 import com.localfood.localfoodmarket.domain.product.entity.Product;
 import com.localfood.localfoodmarket.domain.product.repository.ProductRepository;
+import com.localfood.localfoodmarket.domain.review.entity.Review;
+import com.localfood.localfoodmarket.domain.review.repository.ReviewRepository;
 import com.localfood.localfoodmarket.domain.user.entity.Role;
 import com.localfood.localfoodmarket.domain.user.entity.User;
 import com.localfood.localfoodmarket.domain.user.repository.UserRepository;
@@ -34,6 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -47,6 +50,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final FarmRepository farmRepository;
     private final EscrowRepository escrowRepository;
@@ -221,8 +225,14 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> getOrders(Long userId, Pageable pageable) {
         User user = findUser(userId);
-        return orderRepository.findByUser(user, pageable)
-                .map(order -> OrderResponseDto.of(order, orderItemRepository.findByOrder(order)));
+        Page<Order> orders = orderRepository.findByUser(user, pageable);
+        Map<Long, List<Long>> reviewedProductIdsByOrder = reviewedProductIdsByOrder(
+                user, orders.getContent().stream().map(Order::getId).toList());
+
+        return orders.map(order -> OrderResponseDto.of(
+                order,
+                orderItemRepository.findByOrder(order),
+                reviewedProductIdsByOrder.getOrDefault(order.getId(), List.of())));
     }
 
     @Transactional(readOnly = true)
@@ -230,10 +240,9 @@ public class OrderService {
         User user = findUser(userId);
         Order order = orderRepository.findByIdAndUser(orderId, user)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
-        var escrowStatus = escrowRepository.findByOrder(order)
-                .map(Escrow::getStatus)
-                .orElse(null);
-        return OrderResponseDto.of(order, orderItemRepository.findByOrder(order), escrowStatus);
+        return OrderResponseDto.of(order, orderItemRepository.findByOrder(order),
+                reviewedProductIdsByOrder(user, List.of(order.getId()))
+                        .getOrDefault(order.getId(), List.of()));
     }
 
     // ===== 농가: 주문 상태 진행 (PAID → READY / PREPARING → SHIPPING → DELIVERED) =====
@@ -377,7 +386,20 @@ public class OrderService {
         // 4·5) 구매자 포인트 복원 + point_logs(REFUND, balanceAfter)
         pointService.refund(order.getUser(), order, escrow.getAmount());
 
-        return OrderResponseDto.of(order, items, escrow.getStatus());
+        return OrderResponseDto.of(order, items, order.getUser().getPointBalance(), escrow.getStatus());
+    }
+
+    private Map<Long, List<Long>> reviewedProductIdsByOrder(User user, List<Long> orderIds) {
+        if (orderIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, List<Long>> result = new HashMap<>();
+        for (Review review : reviewRepository.findByUserAndOrderIdIn(user, orderIds)) {
+            result.computeIfAbsent(review.getOrder().getId(), ignored -> new ArrayList<>())
+                    .add(review.getProduct().getId());
+        }
+        return result;
     }
 
     private User findUser(Long userId) {

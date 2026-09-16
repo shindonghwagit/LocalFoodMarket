@@ -203,7 +203,9 @@ export default function PostDetailPage() {
   // 이 게시글 태그 상품 중 구매완료된 것
   const reviewableItems = post.taggedProducts?.flatMap((tp) =>
     doneOrders.flatMap((o) =>
-      o.items.filter((i) => i.productId === tp.id).map(() => ({ productId: tp.id, orderId: o.orderId, productName: tp.name }))
+      o.items
+        .filter((i) => i.productId === tp.id && !o.reviewedProductIds?.includes(tp.id))
+        .map(() => ({ productId: tp.id, orderId: o.orderId, productName: tp.name }))
     )
   ) ?? [];
 
