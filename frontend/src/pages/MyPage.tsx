@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Order, PointLog, PointLogType, Post } from '../types';
 import { getOrders, confirmOrder, cancelOrder } from '../api/order';
 import { getPosts } from '../api/post';
-import { chargePoint, getPointLogs } from '../api/point';
+import { getPointLogs } from '../api/point';
 import { getMe } from '../api/auth';
+import { preparePayment } from '../api/payment';
 import useAuthStore from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import OrderStatusBadge from '../components/order/OrderStatusBadge';
@@ -188,6 +189,7 @@ function OrdersTab() {
 /* ── 포인트 탭 ────────────────────────────────────────────────────────────── */
 function PointTab() {
   const { user, setUser } = useAuthStore();
+  const navigate = useNavigate();
   const [logs, setLogs] = useState<PointLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [charging, setCharging] = useState(false);
@@ -207,11 +209,15 @@ function PointTab() {
     setCharging(true);
     setChargeError('');
     try {
-      const { data } = await chargePoint(amount);
-      if (user) setUser({ ...user, pointBalance: data.data.pointBalance });
-      setLogs((prev) => [{ id: Date.now(), amount, type: 'CHARGE', createdAt: new Date().toISOString() }, ...prev]);
+      if (!user) throw new Error('로그인이 필요한 서비스예요. 로그인 후 이용해주세요.');
+      if (user.role !== 'CONSUMER') {
+        throw new Error('포인트 충전은 소비자 계정에서만 이용할 수 있어요.');
+      }
+      const { data } = await preparePayment(amount);
+      sessionStorage.setItem('pendingPointPayment', JSON.stringify(data.data));
+      navigate('/payments/checkout');
     } catch (err: any) {
-      setChargeError(err?.response?.data?.error?.message ?? '충전에 실패했어요.');
+      setChargeError(err?.response?.data?.error?.message ?? err?.message ?? '충전에 실패했어요.');
     } finally {
       setCharging(false);
     }

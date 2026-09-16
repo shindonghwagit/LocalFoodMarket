@@ -18,6 +18,9 @@ import PostDetailPage from './pages/PostDetailPage';
 import MyPage from './pages/MyPage';
 import OrdersPage from './pages/OrdersPage';
 import CommunityWritePage from './pages/CommunityWritePage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
+import PaymentCheckoutPage from './pages/PaymentCheckoutPage';
 
 import FarmDashboardPage from './pages/farm/FarmDashboardPage';
 import FarmProductManagePage from './pages/farm/FarmProductManagePage';
@@ -61,6 +64,9 @@ export default function App() {
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/community/write" element={<CommunityWritePage />} />
             <Route path="/community/:id" element={<PostDetailPage />} />
+            <Route path="/payments/success" element={<PaymentSuccessPage />} />
+            <Route path="/payments/fail" element={<PaymentFailPage />} />
+            <Route path="/payments/checkout" element={<PaymentCheckoutPage />} />
           </Route>
 
           <Route element={<PrivateRoute roles={['FARMER']} />}>
