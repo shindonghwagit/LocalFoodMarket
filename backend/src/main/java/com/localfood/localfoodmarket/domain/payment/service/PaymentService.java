@@ -48,7 +48,8 @@ public class PaymentService {
                 .amount(amount)
                 .build());
 
-        return PaymentResponseDto.forPrepare(payment, tossConfig.getClientKey());
+        return PaymentResponseDto.forPrepare(payment, tossConfig.getClientKey(),
+                user.getOrCreatePaymentCustomerKey());
     }
 
     /**
@@ -69,7 +70,7 @@ public class PaymentService {
         }
 
         // 5) 승인 성공 → 결제 완료 + 포인트 적립
-        return self.getObject().completeAndCredit(orderId, paymentKey, tossResponse);
+        return self.getObject().completeAndCredit(orderId, paymentKey, amount, tossResponse);
     }
 
     @Transactional(readOnly = true)
@@ -95,13 +96,21 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponseDto completeAndCredit(String orderId, String paymentKey, TossConfirmResponse tossResponse) {
+    public PaymentResponseDto completeAndCredit(String orderId, String paymentKey, int amount,
+                                                 TossConfirmResponse tossResponse) {
         // 비관적 락으로 다시 읽어 동시 중복 적립을 차단
         Payment payment = paymentRepository.findByOrderIdForUpdate(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
         if (payment.isDone()) {
             throw new BusinessException(ErrorCode.PAYMENT_ALREADY_DONE);
+        }
+        if (!paymentKey.equals(tossResponse.paymentKey())
+                || !orderId.equals(tossResponse.orderId())
+                || !Integer.valueOf(amount).equals(tossResponse.totalAmount())
+                || !"DONE".equals(tossResponse.status())) {
+            payment.fail();
+            throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
 
         LocalDateTime approvedAt = tossResponse.approvedAt() != null

@@ -20,19 +20,21 @@ public class PaymentResponseDto {
 
     // 준비(prepare) 응답 — 프론트 토스 SDK 초기화용 (clientKey만, secretKey는 절대 미포함)
     private final String clientKey;
+    private final String customerKey;
 
     // 승인(confirm) 응답
     private final String paymentKey;
     private final LocalDateTime approvedAt;
     private final Long pointBalance;   // 충전 후 잔액
 
-    public static PaymentResponseDto forPrepare(Payment payment, String clientKey) {
+    public static PaymentResponseDto forPrepare(Payment payment, String clientKey, String customerKey) {
         return PaymentResponseDto.builder()
                 .paymentId(payment.getId())
                 .orderId(payment.getOrderId())
                 .amount(payment.getAmount())
                 .status(payment.getStatus())
                 .clientKey(clientKey)
+                .customerKey(customerKey)
                 .build();
     }
 

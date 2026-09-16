@@ -253,11 +253,18 @@ DELIVERED 상태 + delivered_at + 7일 < now
 
 ### GET `/points/balance` — 잔액 조회 (CONSUMER)
 ### GET `/points/logs` — 이력 조회 (CHARGE/HOLD/RELEASE/REFUND 필터)
-### POST `/points/charge` — 충전 (ADMIN)
+
+## 11. 결제 `/payments`
+
+### POST `/payments/prepare` — 포인트 충전 결제 준비 (CONSUMER)
+서버가 토스 결제용 주문 번호와 금액을 저장하고, 클라이언트 키·고객 키를 반환한다.
+
+### POST `/payments/confirm` — 토스 승인 후 포인트 적립 (CONSUMER)
+토스 승인 응답의 결제 키·주문 번호·금액·상태를 검증한 뒤에만 포인트를 적립한다.
 
 ---
 
-## 11. 관리자 `/admin`
+## 12. 관리자 `/admin`
 
 ### GET `/admin/farms` — 전체 농가 (status 필터)
 ### PATCH `/admin/farms/{farmId}/status` — 승인/반려
@@ -268,7 +275,7 @@ DELIVERED 상태 + delivered_at + 7일 < now
 
 ---
 
-## 12. 실시간 SSE `/sse`
+## 13. 실시간 SSE `/sse`
 
 ### GET `/sse/farm` — 농가 주문 알림 (FARMER)
 ```
