@@ -178,7 +178,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
     getOrders()
-      .then(({ data }) => setDoneOrders(data.data.content.filter((o) => o.status === 'DONE')))
+      .then(({ data }) => setDoneOrders(data.data.content.filter((o) => o.status === 'CONFIRMED' || o.status === 'SETTLED')))
       .catch(() => {});
   }, [isAuthenticated]);
 
@@ -203,7 +203,7 @@ export default function PostDetailPage() {
   // 이 게시글 태그 상품 중 구매완료된 것
   const reviewableItems = post.taggedProducts?.flatMap((tp) =>
     doneOrders.flatMap((o) =>
-      o.items.filter((i) => i.productId === tp.id).map(() => ({ productId: tp.id, orderId: o.id, productName: tp.name }))
+      o.items.filter((i) => i.productId === tp.id).map(() => ({ productId: tp.id, orderId: o.orderId, productName: tp.name }))
     )
   ) ?? [];
 

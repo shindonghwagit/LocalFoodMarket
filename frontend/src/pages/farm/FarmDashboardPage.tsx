@@ -8,7 +8,7 @@ import { useFarmSSE } from '../../hooks/useFarmSSE';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import OrderStatusBadge from '../../components/order/OrderStatusBadge';
+import OrderStatusBadge, { ORDER_STATUS_META } from '../../components/order/OrderStatusBadge';
 
 /* ── 사이드바 ──────────────────────────────────────────────────────────────── */
 type Tab = 'dashboard' | 'orders' | 'info' | 'stats';
@@ -223,11 +223,12 @@ function OrdersTab({
   const filtered = filter ? orders.filter((o) => o.status === filter) : orders;
 
   const statusOptions: { value: OrderStatus | ''; label: string }[] = [
-    { value: '',         label: '전체' },
-    { value: 'PENDING',  label: '결제대기' },
-    { value: 'PAID',     label: '결제완료' },
-    { value: 'SHIPPING', label: '배송중' },
-    { value: 'DONE',     label: '배송완료' },
+    { value: '',          label: '전체' },
+    { value: 'PAID',      label: '결제완료' },
+    { value: 'PREPARING', label: '준비중' },
+    { value: 'SHIPPING',  label: '배송중' },
+    { value: 'DELIVERED', label: '배송완료' },
+    { value: 'SETTLED',   label: '거래완료' },
   ];
 
   if (loading) return <div className="flex justify-center py-xl"><LoadingSpinner size="lg" /></div>;
@@ -263,12 +264,12 @@ function OrdersTab({
               </thead>
               <tbody className="divide-y divide-outline-variant">
                 {filtered.map((order) => {
-                  const st = STATUS_LABELS[order.status] ?? { label: order.status, color: 'text-on-surface' };
-                  const nextAction = NEXT_STATUS[order.status as OrderStatus];
+                  const st = ORDER_STATUS_META[order.status] ?? { label: order.status, color: 'text-on-surface' };
+                  const nextAction = farmerNextAction(order);
                   const date = new Date(order.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                   return (
-                    <tr key={order.id} className="hover:bg-surface-container-low transition-colors">
-                      <td className="px-md py-sm font-label-sm text-label-sm text-outline">#{order.id}</td>
+                    <tr key={order.orderId} className="hover:bg-surface-container-low transition-colors">
+                      <td className="px-md py-sm font-label-sm text-label-sm text-outline">#{order.orderId}</td>
                       <td className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{date}</td>
                       <td className="px-md py-sm font-body-md text-body-md text-on-surface max-w-[160px]">
                         <p className="line-clamp-1">{order.items.map((i) => i.productName).join(', ')}</p>
@@ -280,7 +281,7 @@ function OrdersTab({
                       <td className={`px-md py-sm font-label-md text-label-md font-semibold whitespace-nowrap ${st.color}`}>{st.label}</td>
                       <td className="px-md py-sm whitespace-nowrap">
                         {nextAction ? (
-                          <Button size="sm" onClick={() => onStatusChange(order.id, nextAction.next)}>
+                          <Button size="sm" onClick={() => onStatusChange(order.orderId, nextAction.next)}>
                             {nextAction.label}
                           </Button>
                         ) : (
@@ -523,7 +524,7 @@ function StatsTab({ orders }: { orders: Order[] }) {
 
   const maxRevenue = Math.max(...last7.map((d) => d.revenue), 1);
   const totalRevenue = orders.reduce((s, o) => s + o.totalPrice, 0);
-  const doneOrders = orders.filter((o) => o.status === 'DONE');
+  const doneOrders = orders.filter((o) => o.status === 'SETTLED');
 
   return (
     <div className="flex flex-col gap-lg">
@@ -631,8 +632,8 @@ export default function FarmDashboardPage() {
 
   const handleStatusChange = async (orderId: number, status: OrderStatus) => {
     try {
-      const { data } = await updateOrderStatus(orderId, status);
-      setOrders((prev) => prev.map((o) => (o.id === orderId ? data.data : o)));
+      const { data } = await updateOrderStatus(orderId, { status });
+      setOrders((prev) => prev.map((o) => (o.orderId === orderId ? data.data : o)));
     } catch (err: any) {
       alert(err?.response?.data?.error?.message ?? '상태 변경에 실패했어요.');
     }
