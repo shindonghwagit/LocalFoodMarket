@@ -14,8 +14,14 @@ export default function PaymentCheckoutPage() {
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
   const widgets = useRef<TossWidgets | null>(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
+    // React Strict Mode 개발 환경에서는 effect가 두 번 실행된다.
+    // 토스 위젯을 중복 생성하면 화면의 선택 상태와 결제 요청 인스턴스가 달라진다.
+    if (initialized.current) return;
+    initialized.current = true;
+
     const saved = sessionStorage.getItem(PAYMENT_STORAGE_KEY);
     if (!saved) {
       navigate('/mypage', { replace: true });
