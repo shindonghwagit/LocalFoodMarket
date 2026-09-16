@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -30,6 +32,10 @@ public class User extends BaseEntity {
 
     @Column(name = "point_balance", nullable = false)
     private Long pointBalance = 0L;
+
+    // 토스 SDK 고객 식별값. 이메일·순번처럼 추측 가능한 값은 사용하지 않는다.
+    @Column(name = "payment_customer_key", unique = true, length = 64)
+    private String paymentCustomerKey;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean suspended = false;
@@ -61,6 +67,13 @@ public class User extends BaseEntity {
 
     public void chargePoint(long amount) {
         this.pointBalance += amount;
+    }
+
+    public String getOrCreatePaymentCustomerKey() {
+        if (paymentCustomerKey == null) {
+            paymentCustomerKey = "customer_" + UUID.randomUUID().toString().replace("-", "");
+        }
+        return paymentCustomerKey;
     }
 
     public void suspend() {

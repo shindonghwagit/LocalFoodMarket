@@ -1,8 +1,6 @@
 package com.localfood.localfoodmarket.domain.point.service;
 
 import com.localfood.localfoodmarket.domain.order.entity.Order;
-import com.localfood.localfoodmarket.domain.point.dto.PointBalanceResponseDto;
-import com.localfood.localfoodmarket.domain.point.dto.PointChargeRequestDto;
 import com.localfood.localfoodmarket.domain.point.dto.PointLogResponseDto;
 import com.localfood.localfoodmarket.domain.point.entity.PointLog;
 import com.localfood.localfoodmarket.domain.point.entity.PointLogType;
@@ -38,24 +36,6 @@ public class PointService {
                 : pointLogRepository.findByUserAndType(user, type, pageable);
 
         return logs.map(PointLogResponseDto::from);
-    }
-
-    @Transactional
-    public PointBalanceResponseDto chargePoint(Long userId, PointChargeRequestDto request) {
-        User user = findUser(userId);
-
-        user.chargePoint(request.getAmount());
-
-        pointLogRepository.save(PointLog.builder()
-                .user(user)
-                .amount(request.getAmount())
-                .type(PointLogType.CHARGE)
-                .balanceAfter(user.getPointBalance())
-                .build());
-
-        return PointBalanceResponseDto.builder()
-                .pointBalance(user.getPointBalance())
-                .build();
     }
 
     /**
