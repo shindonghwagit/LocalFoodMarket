@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom';
 import type { Farm } from '../../types';
 import Badge from '../common/Badge';
+import vegetableFarmImage from '../../assets/packd/farm-vegetable.png';
+import seafoodFarmImage from '../../assets/packd/farm-seafood.png';
+import riceFarmImage from '../../assets/packd/farm-rice.png';
+import seaweedFarmImage from '../../assets/packd/farm-seaweed.png';
+import fruitFarmImage from '../../assets/packd/farm-fruit.png';
+import livestockFarmImage from '../../assets/packd/farm-livestock.png';
+import dairyFarmImage from '../../assets/packd/farm-dairy.png';
 
 interface FarmCardProps {
   farm: Farm;
@@ -9,9 +16,21 @@ interface FarmCardProps {
 const splitTags = (value?: string | null): string[] =>
   value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [];
 
+const categoryImage = (categories: string[], farmId: number) => {
+  if (categories.some((category) => category.includes('수산'))) {
+    return farmId % 2 === 0 ? seaweedFarmImage : seafoodFarmImage;
+  }
+  if (categories.some((category) => category.includes('과일'))) return fruitFarmImage;
+  if (categories.some((category) => category.includes('곡'))) return riceFarmImage;
+  if (categories.some((category) => category.includes('유제품'))) return dairyFarmImage;
+  if (categories.some((category) => category.includes('축산') || category.includes('육류'))) return livestockFarmImage;
+  return vegetableFarmImage;
+};
+
 export default function FarmCard({ farm }: FarmCardProps) {
   const certifications = splitTags(farm.certification);
   const categories = splitTags(farm.category);
+  const fallbackImage = categoryImage(categories, farm.id);
 
   return (
     <Link
@@ -19,10 +38,12 @@ export default function FarmCard({ farm }: FarmCardProps) {
       className="block bg-white rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md transition-all overflow-hidden border border-outline-variant group"
     >
       {/* 이미지/아이콘 영역 */}
-      <div className="h-40 bg-surface-container-high flex items-center justify-center overflow-hidden">
-        <span className="material-symbols-outlined text-[64px] text-on-surface-variant group-hover:scale-110 transition-transform">
-          agriculture
-        </span>
+      <div className="h-40 bg-surface-container-high overflow-hidden">
+        <img
+          src={fallbackImage}
+          alt={`${farm.name} 대표 이미지`}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
       </div>
 
       {/* 콘텐츠 */}

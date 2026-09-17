@@ -11,10 +11,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.id}`}
-      className="block bg-white rounded-xl shadow-sm overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all border border-outline-variant"
+      className="block bg-white overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all border-2 border-black"
     >
       {/* 이미지 */}
-      <div className="relative aspect-[4/5] bg-surface-container-high overflow-hidden">
+      <div className="relative aspect-square bg-surface-container-high overflow-hidden border-b-2 border-black">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -36,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* 정보 */}
-      <div className="p-md">
+      <div className="p-md bg-white">
         <p className="font-label-md text-label-md text-primary mb-xs truncate">{product.farmName}</p>
         <h4 className="font-headline-sm text-headline-sm text-on-surface mb-sm line-clamp-2 leading-snug">
           {product.name}

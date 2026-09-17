@@ -97,9 +97,42 @@
 
 /* ── Global Base ──────────────────────────────────────────────────────────── */
 body {
-  background-color: #faf9f5;
-  color: #1b1c1a;
+  background-color: #ffffff;
+  color: #111111;
   font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.packd-display {
+  font-family: Impact, "Arial Narrow Bold", "Plus Jakarta Sans", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.packd-button {
+  border: 2px solid #111111;
+  border-radius: 0;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.packd-home h2 {
+  font-family: Impact, "Arial Narrow Bold", "Plus Jakarta Sans", sans-serif;
+  color: #111111;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.packd-home .bg-black h2 {
+  color: #ffffff;
+}
+
+footer.bg-black .text-on-surface-variant,
+footer.bg-black .text-primary {
+  color: #d8d8d8;
 }
 
 .material-symbols-outlined {
@@ -109,10 +142,51 @@ body {
 }
 
 .hero-gradient {
-  background: linear-gradient(rgba(21, 66, 18, 0.4), rgba(21, 66, 18, 0.6));
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.44) 43%, rgba(0, 0, 0, 0.06) 75%);
 }
 
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
 }
+
+/* Figma homepage — node 12:266 */
+.packd-home { background: #fff; color: #111; font-family: Inter, Arial, sans-serif; overflow: hidden; }
+.packd-home h1, .packd-home h2, .packd-home h3 { font-family: Impact, "Arial Narrow", sans-serif; font-weight: 400; letter-spacing: .025em; text-transform: uppercase; }
+.packd-hero { height: 550px; position: relative; display: flex; align-items: center; color: #fff; }
+.packd-hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.packd-hero__shade { position: absolute; inset: 0; background: radial-gradient(ellipse at 25% 50%, rgba(0,0,0,.58), transparent 52%), linear-gradient(90deg, rgba(0,0,0,.3), transparent 70%); }
+.packd-hero__content { position: relative; width: min(100% - 48px, 1280px); margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; text-shadow: 0 3px 7px rgba(0,0,0,.25); }
+.packd-hero__content p, .packd-section-heading p { font-size: 14px; font-weight: 700; letter-spacing: .32em; margin: 0 0 18px; }
+.packd-hero h1 { font-size: clamp(42px, 4vw, 62px); line-height: 1.04; margin: 0 0 18px; }
+.packd-hero__content > span { font-size: 19px; margin-bottom: 30px; }
+.packd-cta { display: inline-block; border: 2px solid #111; background: #fff; color: #111; padding: 23px 42px; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; transition: background .2s, color .2s; }
+.packd-cta:hover { background: #111; color: #fff; }.packd-cta--dark { background: #111; color: #fff; }.packd-cta--dark:hover { background: #fff; color: #111; }
+.packd-benefits { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #ddd; }.packd-benefits div { min-height: 72px; display: flex; align-items: center; justify-content: center; gap: 14px; border-right: 1px solid #ddd; }.packd-benefits div:last-child { border-right: 0; }.packd-benefits span { font-size: 31px; }.packd-benefits b { font-size: 14px; }
+.packd-editorial { padding: 60px 0; }.packd-editorial__inner { width: min(100% - 48px, 1614px); margin: auto; display: grid; grid-template-columns: 1fr 1fr; align-items: center; }.packd-editorial__inner--reverse { direction: rtl; }.packd-editorial__inner--reverse > * { direction: ltr; }.packd-editorial__image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }.packd-editorial__copy { padding: 55px 7.5%; text-align: center; }.packd-editorial__copy h2, .packd-section-heading h2 { font-size: clamp(34px, 3.1vw, 52px); line-height: 1.1; margin: 0 0 35px; }.packd-editorial__copy p { max-width: 640px; margin: 0 auto 42px; font-size: 17px; line-height: 1.8; }
+.packd-products, .packd-farms, .packd-community { padding: 80px max(24px, calc((100vw - 1614px) / 2)); }.packd-products { background: #f6f6f4; }.packd-farms { background: #fff; }.packd-section-heading { text-align: center; margin-bottom: 42px; }.packd-section-heading p { margin-bottom: 13px; }.packd-section-heading h2 { margin-bottom: 0; }.packd-products__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }.packd-farms__grid, .packd-community__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }.packd-centered-action { text-align: center; margin-top: 48px; }.packd-empty { text-align: center; padding: 30px; color: #666; }
+.packd-community { background: #f2f3ed; }.packd-post { display: block; color: inherit; text-decoration: none; background: #fff; }.packd-post img, .packd-post__placeholder { width: 100%; aspect-ratio: .67; object-fit: cover; display: block; }.packd-post__placeholder--0 { background: #d5e1c6; }.packd-post__placeholder--1 { background: #f1c28e; }.packd-post__placeholder--2 { background: #c9d4e1; }.packd-post > div:last-child { padding: 25px; }.packd-post small { letter-spacing: .12em; font-weight: 700; }.packd-post h3 { font-size: 28px; margin: 12px 0; }.packd-post p { color: #555; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }.packd-post span { display: block; margin-top: 22px; font-weight: 700; font-size: 14px; }
+@media (max-width: 800px) { .packd-hero { height: 500px; }.packd-benefits { grid-template-columns: repeat(2, 1fr); }.packd-benefits div:nth-child(2) { border-right: 0; }.packd-benefits div { border-bottom: 1px solid #ddd; }.packd-editorial { padding: 32px 0; }.packd-editorial__inner, .packd-editorial__inner--reverse { grid-template-columns: 1fr; direction: ltr; }.packd-editorial__copy { padding: 55px 18px; }.packd-products__grid { grid-template-columns: repeat(2, 1fr); }.packd-farms__grid, .packd-community__grid { grid-template-columns: 1fr; }.packd-products, .packd-farms, .packd-community { padding-top: 58px; padding-bottom: 58px; } }
+
+/* Admin console: share the storefront's bold black-and-white editorial system. */
+.admin-console, .admin-login { background: #f6f6f4; color: #111; font-family: Inter, Arial, sans-serif; }
+.admin-console aside { width: 18rem; background: #111 !important; color: #fff; border-right: 2px solid #111; }
+.admin-console aside > div { border-color: #3d3d3d !important; }
+.admin-console aside h1, .admin-console main h2, .admin-console h3, .admin-login h1 { font-family: Impact, "Arial Narrow", sans-serif; font-weight: 400; letter-spacing: .035em; text-transform: uppercase; }
+.admin-console aside p, .admin-console aside button { color: #f4f4f0 !important; }
+.admin-console aside nav button { border: 1px solid transparent; border-radius: 0 !important; min-height: 48px; }
+.admin-console aside nav button:hover { background: #2a2a2a !important; border-color: #777; }
+.admin-console aside nav button.bg-primary { background: #fff !important; color: #111 !important; border-color: #fff; }
+.admin-console main { padding: 48px; }
+.admin-console .bg-white, .admin-console .bg-surface-container-low, .admin-console .bg-surface-container-high, .admin-console .bg-surface-container { border-color: #111 !important; border-radius: 0 !important; }
+.admin-console .bg-white { box-shadow: 5px 5px 0 #111; }
+.admin-console thead, .admin-console thead.bg-surface-container-low { background: #111 !important; }
+.admin-console thead th { color: #fff !important; letter-spacing: .08em; text-transform: uppercase; }
+.admin-console tbody tr:hover { background: #f0f0ed !important; }
+.admin-console button[class*="bg-primary"], .admin-console button.bg-error, .admin-console form button[type="submit"], .admin-login button[type="submit"] { background: #111 !important; border: 2px solid #111 !important; border-radius: 0 !important; color: #fff !important; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.admin-console button.bg-error { background: #b42318 !important; border-color: #b42318 !important; }
+.admin-console input, .admin-console select, .admin-login input { border: 1.5px solid #111 !important; border-radius: 0 !important; background: #fff !important; }
+.admin-console input:focus, .admin-console select:focus, .admin-login input:focus { box-shadow: 3px 3px 0 #111 !important; }
+.admin-login > div > div:last-child { border: 2px solid #111 !important; border-radius: 0 !important; box-shadow: 8px 8px 0 #111; }
+.admin-login .text-primary { color: #111 !important; }
+@media (max-width: 768px) { .admin-console { display: block; }.admin-console aside { width: 100%; min-height: auto; }.admin-console aside nav { flex-direction: row; overflow-x: auto; }.admin-console aside nav button { flex: 0 0 auto; }.admin-console main { padding: 28px 20px; } }

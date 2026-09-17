@@ -5,8 +5,9 @@ import { useAuth } from '../hooks/useAuth';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 
-const KAKAO_AUTH_URL = 'http://localhost:8080/api/v1/auth/oauth2/authorization/kakao';
-const GOOGLE_AUTH_URL = 'http://localhost:8080/api/v1/auth/oauth2/authorization/google';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
+const KAKAO_AUTH_URL = `${API_BASE_URL}/auth/oauth2/authorization/kakao`;
+const GOOGLE_AUTH_URL = `${API_BASE_URL}/auth/oauth2/authorization/google`;
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

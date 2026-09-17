@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import logo from '../../assets/logo.png';
+import logo from '../../../../docs/logo.png';
 import useAuthStore from '../../store/authStore';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -21,17 +21,20 @@ export default function Header() {
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `font-body-md text-body-md transition-colors duration-200 ${
-      isActive ? 'text-primary font-semibold' : 'text-on-surface-variant hover:text-primary'
+      isActive ? 'text-black font-bold' : 'text-on-surface-variant hover:text-black'
     }`;
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-outline-variant shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b-2 border-black">
+      <div className="bg-black py-2 text-center text-[11px] font-bold tracking-[0.16em] text-white uppercase">
+        지역 농가의 신선함을 집 앞까지
+      </div>
       <div className="max-w-max-width mx-auto px-gutter">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* 로고 */}
           <Link to="/" className="flex items-center gap-sm shrink-0">
             <img src={logo} alt="Farmer's Market 로고" className="h-10 w-auto" />
-            <span className="font-headline-sm text-headline-sm font-bold text-primary">
+            <span className="packd-display text-2xl text-black">
               Farmer's Market
             </span>
           </Link>

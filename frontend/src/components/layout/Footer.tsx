@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
-import logo from '../../assets/logo.png';
+import logo from '../../../../docs/logo.png';
 
 export default function Footer() {
   return (
-    <footer className="bg-surface-container-highest">
+    <footer className="bg-black text-white border-t-2 border-black">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-md px-gutter py-xl max-w-max-width mx-auto w-full">
         {/* 브랜드 */}
         <div className="col-span-1">
           <div className="flex items-center gap-sm mb-md">
             <img src={logo} alt="Farmer's Market 로고" className="h-8 w-auto" />
-            <span className="font-headline-sm text-headline-sm font-bold text-primary">
+            <span className="packd-display text-2xl text-white">
               Farmer's Market
             </span>
           </div>

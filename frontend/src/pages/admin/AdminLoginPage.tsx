@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen py-xl px-gutter flex items-center">
+    <div className="admin-login bg-background min-h-screen py-xl px-gutter flex items-center">
       <div className="mx-auto w-full max-w-[28rem]">
         <div className="text-center mb-lg">
           <div className="inline-flex flex-col items-center gap-sm">

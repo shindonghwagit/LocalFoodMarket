@@ -551,7 +551,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="admin-console flex min-h-screen bg-background">
       <Sidebar tab={tab} setTab={setTab} />
 
       <main className="flex-1 p-lg overflow-auto">
