@@ -23,6 +23,7 @@ backend/src/main/resources/application-prod.yml
 # ================================
 frontend/node_modules/
 frontend/dist/
+frontend/dist-admin/
 frontend/.env
 frontend/.env.local
 frontend/.env.production
